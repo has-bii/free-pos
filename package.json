@@ -1,0 +1,22 @@
+{
+	"name": "reef-pos",
+	"private": true,
+	"packageManager": "pnpm@11.16.0",
+	"engines": {
+		"node": "24.18.0"
+	},
+	"scripts": {
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"format": "biome format --write .",
+		"prepare": "lefthook install"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"lefthook": "2.1.10",
+		"turbo": "2.10.7",
+		"typescript": "catalog:"
+	}
+}

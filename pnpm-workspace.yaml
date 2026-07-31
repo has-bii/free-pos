@@ -1,0 +1,26 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  workerd: true
+
+catalog:
+  typescript: 7.0.2
+  "@biomejs/biome": 2.5.6
+  hono: 4.12.33
+  wrangler: 4.117.0
+  drizzle-orm: 0.45.2
+  drizzle-kit: 0.31.10
+  "@tidbcloud/serverless": 0.3.0
+  vitest: 4.1.10
+  "@cloudflare/vitest-pool-workers": 0.20.0
+
+minimumReleaseAgeExclude:
+  - '@cloudflare/vitest-pool-workers@0.20.0'
+  - '@cloudflare/workers-types@5.20260731.1'
+  - hono@4.12.33
+  - miniflare@5.20260730.0-alpha
+  - wrangler@4.117.0

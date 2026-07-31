@@ -1,0 +1,26 @@
+{
+	"name": "@reef-pos/auth",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"build": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@reef-pos/database": "workspace:*",
+		"hono": "catalog:"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "catalog:",
+		"@cloudflare/workers-types": "5.20260731.1",
+		"@reef-pos/typescript-config": "workspace:*",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"wrangler": "catalog:"
+	}
+}
