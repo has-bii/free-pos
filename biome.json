@@ -23,5 +23,10 @@
 			"semicolons": "asNeeded",
 			"bracketSpacing": true
 		}
+	},
+	"assist": {
+		"actions": {
+			"recommended": true
+		}
 	}
 }
