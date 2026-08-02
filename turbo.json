@@ -4,6 +4,11 @@
 		"build": {
 			"dependsOn": ["^build"]
 		},
+		"dev": {
+			"cache": false,
+			"persistent": true,
+			"dependsOn": ["^build"]
+		},
 		"lint": {
 			"dependsOn": ["^build"]
 		},
