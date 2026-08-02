@@ -15,12 +15,15 @@
 	},
 	"dependencies": {
 		"@tidbcloud/serverless": "catalog:",
-		"drizzle-orm": "catalog:"
+		"drizzle-orm": "catalog:",
+		"uuidv7": "catalog:",
+		"dotenv": "catalog:"
 	},
 	"devDependencies": {
 		"@reef-pos/typescript-config": "workspace:*",
 		"@types/node": "24.13.3",
 		"drizzle-kit": "catalog:",
+		"mysql2": "catalog:",
 		"typescript": "catalog:"
 	}
 }
