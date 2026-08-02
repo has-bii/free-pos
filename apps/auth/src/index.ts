@@ -6,7 +6,7 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
 
 app.get("/health", async (c) => {
 	try {
-		const db = createDatabaseClient(c.env.DATABASE_URL)
+		const db = createDatabaseClient(c.env.SERO_POS_DATABASE_URL)
 		await db.execute(sql`select 1`)
 		return c.json({ status: "ok" })
 	} catch {
