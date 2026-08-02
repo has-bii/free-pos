@@ -8,8 +8,7 @@
 		"deploy": "wrangler deploy",
 		"lint": "biome check .",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"build": "tsc --noEmit"
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@repo/database": "workspace:*",
