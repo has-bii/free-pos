@@ -13,11 +13,10 @@
 	},
 	"dependencies": {
 		"@repo/database": "workspace:*",
+		"drizzle-orm": "catalog:",
 		"hono": "catalog:"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "catalog:",
-		"@cloudflare/workers-types": "5.20260731.1",
 		"@repo/typescript-config": "workspace:*",
 		"typescript": "catalog:",
 		"vitest": "catalog:",

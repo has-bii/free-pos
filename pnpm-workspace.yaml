@@ -17,13 +17,5 @@ catalog:
   "@tidbcloud/serverless": 0.3.0
   uuidv7: 1.2.1
   vitest: 4.1.10
-  "@cloudflare/vitest-pool-workers": 0.20.0
   dotenv: ^17.4.2
   mysql2: 3.23.2
-
-minimumReleaseAgeExclude:
-  - '@cloudflare/vitest-pool-workers@0.20.0'
-  - '@cloudflare/workers-types@5.20260731.1'
-  - hono@4.12.33
-  - miniflare@5.20260730.0-alpha
-  - wrangler@4.117.0
