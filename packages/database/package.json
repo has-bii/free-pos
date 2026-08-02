@@ -9,7 +9,6 @@
 		"lint": "biome check .",
 		"typecheck": "tsc --noEmit",
 		"test": "echo \"no tests\" && exit 0",
-		"build": "tsc --noEmit",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate"
 	},
