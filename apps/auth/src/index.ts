@@ -1,8 +1,8 @@
+import { factory } from "@repo/auth/factory"
+import { dbMiddleware } from "@repo/auth/middleware/db"
+import { loginRoutes } from "@repo/auth/modules/login/login.routes"
+import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
-import { factory } from "./factory"
-import { dbMiddleware } from "./middleware/db"
-import { loginRoutes } from "./modules/login/login.routes"
-import { registerRoutes } from "./modules/register/register.routes"
 
 const app = factory
 	.createApp()

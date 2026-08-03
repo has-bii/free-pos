@@ -1,7 +1,7 @@
+import { EmailAlreadyExistsError } from "@repo/auth/errors"
+import type { DatabaseExecutor } from "@repo/auth/factory"
 import { user } from "@repo/database"
 import { eq } from "drizzle-orm"
-import { EmailAlreadyExistsError } from "../errors"
-import type { DatabaseExecutor } from "../factory"
 
 const isDuplicateEntryError = (err: unknown): boolean => {
 	if (!(err instanceof Error)) return false

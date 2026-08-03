@@ -1,10 +1,10 @@
-import { factory } from "../../factory"
-import { verifyPassword } from "../../lib/password"
-import { createSession } from "../../lib/session"
-import { validate } from "../../middleware/validate"
-import { AccountRepository } from "../../repositories/account.repository"
-import { SessionRepository } from "../../repositories/session.repository"
-import { UserRepository } from "../../repositories/user.repository"
+import { factory } from "@repo/auth/factory"
+import { verifyPassword } from "@repo/auth/lib/password"
+import { createSession } from "@repo/auth/lib/session"
+import { validate } from "@repo/auth/middleware/validate"
+import { AccountRepository } from "@repo/auth/repositories/account.repository"
+import { SessionRepository } from "@repo/auth/repositories/session.repository"
+import { UserRepository } from "@repo/auth/repositories/user.repository"
 import { loginEmailSchema } from "./login.schema"
 
 export const loginEmailHandlers = factory.createHandlers(

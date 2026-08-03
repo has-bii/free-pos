@@ -1,5 +1,5 @@
+import type { DatabaseExecutor } from "@repo/auth/factory"
 import { session } from "@repo/database"
-import type { DatabaseExecutor } from "../factory"
 
 export abstract class SessionRepository {
 	static async insert(

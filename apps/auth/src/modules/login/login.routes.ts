@@ -1,4 +1,4 @@
-import { factory } from "../../factory"
+import { factory } from "@repo/auth/factory"
 import { loginEmailHandlers } from "./login.handlers"
 
 export const loginRoutes = factory

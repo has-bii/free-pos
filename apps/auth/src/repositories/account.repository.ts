@@ -1,6 +1,6 @@
+import type { DatabaseExecutor } from "@repo/auth/factory"
 import { account } from "@repo/database"
 import { and, eq } from "drizzle-orm"
-import type { DatabaseExecutor } from "../factory"
 
 export abstract class AccountRepository {
 	static async findCredentialByUserId(db: DatabaseExecutor, userId: string) {
