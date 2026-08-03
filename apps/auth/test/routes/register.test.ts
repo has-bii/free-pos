@@ -162,18 +162,13 @@ describe("POST /auth/register/email", () => {
 		])
 	})
 
-	// Case 8b — DEFECT, asserted as-is rather than as the PRD's expected 400.
-	// Hono's validator throws HTTPException(400, "Malformed JSON in request
-	// body") for a syntactically broken body, but `index.ts`'s `onError` does
-	// not re-raise HTTPExceptions the way Hono's default handler does, so the
-	// client sees a 500. Flip this to 400 once `onError` forwards
-	// `err.getResponse()` for HTTPException.
-	it("currently returns 500 for malformed JSON", async () => {
+	// Case 8b
+	it("rejects malformed JSON", async () => {
 		const res = await postRaw(PATH, "{ not json", "application/json")
-		expect(res.status).toBe(500)
+		expect(res.status).toBe(400)
 
 		const body = await readJson<MessageBody>(res)
-		expect(body.message).toBe("Internal server error.")
+		expect(body.message).toBe("Malformed JSON in request body")
 	})
 
 	// Case 9

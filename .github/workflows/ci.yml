@@ -22,6 +22,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Test runs never perform DDL, so the schema has to be brought forward
+      # separately. Uses the same secret as the suite, via DATABASE_URL —
+      # drizzle-kit's own env var, not the Worker's SERO_POS_DATABASE_URL.
+      - name: Apply migrations to the test database
+        run: pnpm --filter @repo/database db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
       # The auth route tests run against a real TiDB database. Concurrent runs
       # are safe: every test mints a unique `t-<uuid>@test.invalid` address and
       # cleans up after itself, so runs never collide.

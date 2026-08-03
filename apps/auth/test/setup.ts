@@ -1,4 +1,7 @@
 import { env } from "cloudflare:workers"
+import { createDatabaseClient } from "@repo/database"
+import journal from "@repo/database/drizzle/meta/_journal.json"
+import { sql } from "drizzle-orm"
 
 /**
  * Extracts the database name from a connection string.
@@ -30,5 +33,21 @@ const databaseName = databaseNameFrom(env.SERO_POS_DATABASE_URL)
 if (!databaseName || !/test/i.test(databaseName)) {
 	throw new Error(
 		`Refusing to run: database "${databaseName ?? ""}" does not look like a test database.`,
+	)
+}
+
+// Guard 3: migration drift. Test runs never perform DDL, so a migration added
+// after the last `db:migrate` against this database would otherwise surface
+// as a confusing column-not-found error mid-suite.
+const db = createDatabaseClient(env.SERO_POS_DATABASE_URL)
+const result = await db.execute(
+	sql`select count(*) as n from __drizzle_migrations`,
+)
+const firstRow = (result.rows ?? [])[0] as Record<string, unknown> | undefined
+const appliedCount = Number(firstRow?.n ?? 0)
+const expectedCount = journal.entries.length
+if (appliedCount < expectedCount) {
+	throw new Error(
+		`Test database is ${expectedCount - appliedCount} migration(s) behind. Run \`pnpm --filter @repo/database db:migrate\` against it.`,
 	)
 }

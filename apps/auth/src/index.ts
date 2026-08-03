@@ -4,11 +4,15 @@ import { loginRoutes } from "@repo/auth/modules/login/login.routes"
 import { meRoutes } from "@repo/auth/modules/me/me.routes"
 import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
+import { HTTPException } from "hono/http-exception"
 
 const app = factory
 	.createApp()
 	.use(dbMiddleware)
 	.onError((err, c) => {
+		if (err instanceof HTTPException) {
+			return c.json({ message: err.message || "Request failed." }, err.status)
+		}
 		console.error(err)
 		return c.json({ message: "Internal server error." }, 500)
 	})
