@@ -4,7 +4,7 @@ import { signAccessToken, signRefreshToken } from "./jwt"
 // Matches REFRESH_TOKEN_TTL_SECONDS in jwt.ts — the two must stay equal.
 const SESSION_TTL_SECONDS = 2_592_000
 
-export async function createSession(
+export const createSession = async (
 	userId: string,
 	secret: string,
 	meta: { ipAddress: string | null; userAgent: string | null },
@@ -18,7 +18,7 @@ export async function createSession(
 	}
 	accessToken: string
 	refreshToken: string
-}> {
+}> => {
 	const sessionId = uuidv7()
 
 	const [accessToken, refreshToken] = await Promise.all([

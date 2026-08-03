@@ -7,12 +7,12 @@ export type JwtPayload = { sub: string } & Record<string, unknown>
 
 type TokenType = "access" | "refresh"
 
-async function signToken(
+const signToken = async (
 	payload: JwtPayload,
 	secret: string,
 	type: TokenType,
 	ttlSeconds: number,
-): Promise<string> {
+): Promise<string> => {
 	return jwt.sign(
 		{ ...payload, type, exp: Math.floor(Date.now() / 1000) + ttlSeconds },
 		secret,
@@ -20,11 +20,11 @@ async function signToken(
 	)
 }
 
-async function verifyToken(
+const verifyToken = async (
 	token: string,
 	secret: string,
 	type: TokenType,
-): Promise<JwtPayload | null> {
+): Promise<JwtPayload | null> => {
 	try {
 		const verified = await jwt.verify<{ type: TokenType }>(
 			token,
@@ -38,30 +38,30 @@ async function verifyToken(
 	}
 }
 
-export function signAccessToken(
+export const signAccessToken = (
 	payload: JwtPayload,
 	secret: string,
-): Promise<string> {
+): Promise<string> => {
 	return signToken(payload, secret, "access", ACCESS_TOKEN_TTL_SECONDS)
 }
 
-export function signRefreshToken(
+export const signRefreshToken = (
 	payload: JwtPayload,
 	secret: string,
-): Promise<string> {
+): Promise<string> => {
 	return signToken(payload, secret, "refresh", REFRESH_TOKEN_TTL_SECONDS)
 }
 
-export function verifyAccessToken(
+export const verifyAccessToken = (
 	token: string,
 	secret: string,
-): Promise<JwtPayload | null> {
+): Promise<JwtPayload | null> => {
 	return verifyToken(token, secret, "access")
 }
 
-export function verifyRefreshToken(
+export const verifyRefreshToken = (
 	token: string,
 	secret: string,
-): Promise<JwtPayload | null> {
+): Promise<JwtPayload | null> => {
 	return verifyToken(token, secret, "refresh")
 }

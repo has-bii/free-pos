@@ -3,11 +3,11 @@ const ITERATIONS = 50_000
 const SALT_BYTES = 16
 const KEY_BYTES = 32
 
-function toBase64(bytes: Uint8Array): string {
+const toBase64 = (bytes: Uint8Array): string => {
 	return btoa(String.fromCharCode(...bytes))
 }
 
-function fromBase64(value: string): Uint8Array {
+const fromBase64 = (value: string): Uint8Array => {
 	const binary = atob(value)
 	const bytes = new Uint8Array(binary.length)
 	for (let i = 0; i < binary.length; i++) {
@@ -16,7 +16,7 @@ function fromBase64(value: string): Uint8Array {
 	return bytes
 }
 
-function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+const timingSafeEqual = (a: Uint8Array, b: Uint8Array): boolean => {
 	if (a.length !== b.length) return false
 	let diff = 0
 	for (let i = 0; i < a.length; i++) {
@@ -25,11 +25,11 @@ function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
 	return diff === 0
 }
 
-async function derive(
+const derive = async (
 	password: string,
 	salt: Uint8Array,
 	iterations: number,
-): Promise<Uint8Array> {
+): Promise<Uint8Array> => {
 	const keyMaterial = await crypto.subtle.importKey(
 		"raw",
 		new TextEncoder().encode(password),
@@ -47,16 +47,16 @@ async function derive(
 
 // Iteration count is capped by the Workers Free tier's 10ms CPU budget — see
 // docs/prd/user-registration.md#43-password-hashing for the benchmark and trade-off.
-export async function hashPassword(password: string): Promise<string> {
+export const hashPassword = async (password: string): Promise<string> => {
 	const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES))
 	const hash = await derive(password, salt, ITERATIONS)
 	return `${ALGORITHM}$${ITERATIONS}$${toBase64(salt)}$${toBase64(hash)}`
 }
 
-export async function verifyPassword(
+export const verifyPassword = async (
 	password: string,
 	stored: string,
-): Promise<boolean> {
+): Promise<boolean> => {
 	const parts = stored.split("$")
 	if (parts.length !== 4) return false
 	const [algorithm, iterationsStr, saltBase64, hashBase64] = parts
