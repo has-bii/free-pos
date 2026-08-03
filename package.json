@@ -1,5 +1,5 @@
 {
-	"name": "reef-pos",
+	"name": "sero-pos",
 	"private": true,
 	"packageManager": "pnpm@11.16.0",
 	"engines": {
