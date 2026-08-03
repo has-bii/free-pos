@@ -22,3 +22,7 @@ catalog:
   mysql2: 3.23.2
   valibot: 1.4.2
   "@hono/valibot-validator": 0.6.1
+  "@types/node": 24.13.3
+
+minimumReleaseAgeExclude:
+  - hono@4.12.34

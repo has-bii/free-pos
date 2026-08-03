@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"paths": {
 			"@repo/auth/*": ["./src/*"]
-		}
+		},
+		"types": ["./worker-configuration.d.ts", "node"]
 	}
 }
