@@ -1,7 +1,6 @@
 import { factory } from "../../factory"
 import { verifyPassword } from "../../lib/password"
 import { requestMeta } from "../../lib/request"
-import { toAuthResponse } from "../../lib/serialize"
 import { createSession } from "../../lib/session"
 import { validate } from "../../middleware/validate"
 import { findCredentialAccountByUserId } from "../../repositories/account.repository"
@@ -40,6 +39,12 @@ export const loginEmailHandlers = factory.createHandlers(
 		)
 		await insertSession(db, session)
 
-		return c.json(toAuthResponse(foundUser, { accessToken, refreshToken }))
+		return c.json({
+			message: "ok",
+			data: {
+				user: foundUser,
+				token: { accessToken, refreshToken },
+			},
+		})
 	},
 )

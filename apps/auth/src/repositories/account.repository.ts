@@ -2,10 +2,10 @@ import { account } from "@repo/database"
 import { and, eq } from "drizzle-orm"
 import type { DatabaseExecutor } from "../factory"
 
-export async function findCredentialAccountByUserId(
+export const findCredentialAccountByUserId = async (
 	db: DatabaseExecutor,
 	userId: string,
-) {
+) => {
 	const [credentialAccount] = await db
 		.select()
 		.from(account)
@@ -16,9 +16,9 @@ export async function findCredentialAccountByUserId(
 	return credentialAccount ?? null
 }
 
-export async function insertCredentialAccount(
+export const insertCredentialAccount = async (
 	db: DatabaseExecutor,
 	newAccount: typeof account.$inferInsert,
-): Promise<void> {
+): Promise<void> => {
 	await db.insert(account).values(newAccount)
 }

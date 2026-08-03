@@ -4,25 +4,22 @@ import { dbMiddleware } from "./middleware/db"
 import { loginRoutes } from "./modules/login/login.routes"
 import { registerRoutes } from "./modules/register/register.routes"
 
-const app = factory.createApp()
-
-app.use(dbMiddleware)
-
-app.onError((err, c) => {
-	console.error(err)
-	return c.json({ message: "Internal server error." }, 500)
-})
-
-app.get("/health", async (c) => {
-	try {
-		await c.var.db.execute(sql`select 1`)
-		return c.json({ status: "ok" })
-	} catch {
-		return c.json({ status: "error" }, 503)
-	}
-})
-
-app.route("/auth", registerRoutes)
-app.route("/auth", loginRoutes)
+const app = factory
+	.createApp()
+	.use(dbMiddleware)
+	.onError((err, c) => {
+		console.error(err)
+		return c.json({ message: "Internal server error." }, 500)
+	})
+	.get("/health", async (c) => {
+		try {
+			await c.var.db.execute(sql`select 1`)
+			return c.json({ status: "ok" })
+		} catch {
+			return c.json({ status: "error" }, 503)
+		}
+	})
+	.route("/auth", registerRoutes)
+	.route("/auth", loginRoutes)
 
 export default app

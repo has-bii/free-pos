@@ -1,9 +1,9 @@
+import type { user } from "@repo/database"
 import { uuidv7 } from "uuidv7"
 import { EmailAlreadyExistsError } from "../../errors"
 import { factory } from "../../factory"
 import { hashPassword } from "../../lib/password"
 import { requestMeta } from "../../lib/request"
-import { toAuthResponse } from "../../lib/serialize"
 import { createSession } from "../../lib/session"
 import { validate } from "../../middleware/validate"
 import { insertCredentialAccount } from "../../repositories/account.repository"
@@ -23,10 +23,13 @@ export const registerEmailHandlers = factory.createHandlers(
 		}
 
 		const now = new Date()
-		const newUser = {
-			id: uuidv7(),
+		const userId = uuidv7()
+		const newUser: typeof user.$inferInsert = {
+			id: userId,
 			name,
 			email,
+			emailVerified: false,
+			image: null,
 			createdAt: now,
 			updatedAt: now,
 		}
@@ -37,8 +40,8 @@ export const registerEmailHandlers = factory.createHandlers(
 				await insertUser(tx, newUser)
 				await insertCredentialAccount(tx, {
 					id: uuidv7(),
-					userId: newUser.id,
-					accountId: newUser.id,
+					userId: userId,
+					accountId: userId,
 					providerId: "credential",
 					password: passwordHash,
 					createdAt: now,
@@ -53,12 +56,18 @@ export const registerEmailHandlers = factory.createHandlers(
 		}
 
 		const { session, accessToken, refreshToken } = await createSession(
-			newUser.id,
+			userId,
 			c.env.SERO_POS_JWT_SECRET,
 			requestMeta(c),
 		)
 		await insertSession(db, session)
 
-		return c.json(toAuthResponse(newUser, { accessToken, refreshToken }), 201)
+		return c.json(
+			{
+				message: "New user has been created",
+				data: { user: newUser, token: { accessToken, refreshToken } },
+			},
+			201,
+		)
 	},
 )

@@ -1,7 +1,7 @@
 import { session } from "@repo/database"
 import type { DatabaseExecutor } from "../factory"
 
-export async function insertSession(
+export const insertSession = async (
 	db: DatabaseExecutor,
 	newSession: {
 		id: string
@@ -10,8 +10,7 @@ export async function insertSession(
 		ipAddress: string | null
 		userAgent: string | null
 	},
-): Promise<void> {
-	const now = new Date()
+): Promise<void> => {
 	await db.insert(session).values({
 		id: newSession.id,
 		token: newSession.id,
@@ -19,7 +18,5 @@ export async function insertSession(
 		expiresAt: newSession.expiresAt,
 		ipAddress: newSession.ipAddress,
 		userAgent: newSession.userAgent,
-		createdAt: now,
-		updatedAt: now,
 	})
 }
