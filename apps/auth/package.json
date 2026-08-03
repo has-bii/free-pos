@@ -11,9 +11,13 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
+		"@hono/valibot-validator": "catalog:",
 		"@repo/database": "workspace:*",
+		"@tsndr/cloudflare-worker-jwt": "catalog:",
 		"drizzle-orm": "catalog:",
-		"hono": "catalog:"
+		"hono": "catalog:",
+		"uuidv7": "catalog:",
+		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",

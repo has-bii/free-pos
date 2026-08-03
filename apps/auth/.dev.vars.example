@@ -1,1 +1,2 @@
 SERO_POS_DATABASE_URL=mysql://user:password@host:4000/database
+SERO_POS_JWT_SECRET=change-me
