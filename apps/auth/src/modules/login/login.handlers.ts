@@ -1,6 +1,5 @@
 import { factory } from "../../factory"
 import { verifyPassword } from "../../lib/password"
-import { requestMeta } from "../../lib/request"
 import { createSession } from "../../lib/session"
 import { validate } from "../../middleware/validate"
 import { findCredentialAccountByUserId } from "../../repositories/account.repository"
@@ -35,7 +34,7 @@ export const loginEmailHandlers = factory.createHandlers(
 		const { session, accessToken, refreshToken } = await createSession(
 			foundUser.id,
 			c.env.SERO_POS_JWT_SECRET,
-			requestMeta(c),
+			{ ipAddress: null, userAgent: null },
 		)
 		await insertSession(db, session)
 

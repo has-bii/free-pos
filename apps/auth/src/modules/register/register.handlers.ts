@@ -3,7 +3,6 @@ import { uuidv7 } from "uuidv7"
 import { EmailAlreadyExistsError } from "../../errors"
 import { factory } from "../../factory"
 import { hashPassword } from "../../lib/password"
-import { requestMeta } from "../../lib/request"
 import { createSession } from "../../lib/session"
 import { validate } from "../../middleware/validate"
 import { insertCredentialAccount } from "../../repositories/account.repository"
@@ -58,7 +57,7 @@ export const registerEmailHandlers = factory.createHandlers(
 		const { session, accessToken, refreshToken } = await createSession(
 			userId,
 			c.env.SERO_POS_JWT_SECRET,
-			requestMeta(c),
+			{ ipAddress: null, userAgent: null },
 		)
 		await insertSession(db, session)
 
