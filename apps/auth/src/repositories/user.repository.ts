@@ -9,25 +9,27 @@ const isDuplicateEntryError = (err: unknown): boolean => {
 	return /duplicate entry/i.test(err.message)
 }
 
-export const findUserByEmail = async (db: DatabaseExecutor, email: string) => {
-	const [foundUser] = await db
-		.select()
-		.from(user)
-		.where(eq(user.email, email))
-		.limit(1)
-	return foundUser ?? null
-}
+export abstract class UserRepository {
+	static async findByEmail(db: DatabaseExecutor, email: string) {
+		const [foundUser] = await db
+			.select()
+			.from(user)
+			.where(eq(user.email, email))
+			.limit(1)
+		return foundUser ?? null
+	}
 
-export const insertUser = async (
-	db: DatabaseExecutor,
-	newUser: typeof user.$inferInsert,
-): Promise<void> => {
-	try {
-		await db.insert(user).values(newUser)
-	} catch (err) {
-		if (isDuplicateEntryError(err)) {
-			throw new EmailAlreadyExistsError(newUser.email)
+	static async insert(
+		db: DatabaseExecutor,
+		newUser: typeof user.$inferInsert,
+	): Promise<void> {
+		try {
+			await db.insert(user).values(newUser)
+		} catch (err) {
+			if (isDuplicateEntryError(err)) {
+				throw new EmailAlreadyExistsError(newUser.email)
+			}
+			throw err
 		}
-		throw err
 	}
 }

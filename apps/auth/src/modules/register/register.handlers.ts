@@ -5,9 +5,9 @@ import { factory } from "../../factory"
 import { hashPassword } from "../../lib/password"
 import { createSession } from "../../lib/session"
 import { validate } from "../../middleware/validate"
-import { insertCredentialAccount } from "../../repositories/account.repository"
-import { insertSession } from "../../repositories/session.repository"
-import { findUserByEmail, insertUser } from "../../repositories/user.repository"
+import { AccountRepository } from "../../repositories/account.repository"
+import { SessionRepository } from "../../repositories/session.repository"
+import { UserRepository } from "../../repositories/user.repository"
 import { registerEmailSchema } from "./register.schema"
 
 export const registerEmailHandlers = factory.createHandlers(
@@ -16,7 +16,7 @@ export const registerEmailHandlers = factory.createHandlers(
 		const { name, email, password } = c.req.valid("json")
 		const db = c.var.db
 
-		const existing = await findUserByEmail(db, email)
+		const existing = await UserRepository.findByEmail(db, email)
 		if (existing) {
 			return c.json({ message: "Email already registered." }, 409)
 		}
@@ -36,8 +36,8 @@ export const registerEmailHandlers = factory.createHandlers(
 
 		try {
 			await db.transaction(async (tx) => {
-				await insertUser(tx, newUser)
-				await insertCredentialAccount(tx, {
+				await UserRepository.insert(tx, newUser)
+				await AccountRepository.insert(tx, {
 					userId,
 					accountId: userId,
 					providerId: "credential",
@@ -56,7 +56,7 @@ export const registerEmailHandlers = factory.createHandlers(
 			c.env.SERO_POS_JWT_SECRET,
 			{ ipAddress: null, userAgent: null },
 		)
-		await insertSession(db, { ...session, token: session.id })
+		await SessionRepository.insert(db, { ...session, token: session.id })
 
 		return c.json(
 			{
