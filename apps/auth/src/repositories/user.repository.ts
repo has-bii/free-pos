@@ -19,6 +19,15 @@ export abstract class UserRepository {
 		return foundUser ?? null
 	}
 
+	static async findById(db: DatabaseExecutor, id: string) {
+		const [foundUser] = await db
+			.select()
+			.from(user)
+			.where(eq(user.id, id))
+			.limit(1)
+		return foundUser ?? null
+	}
+
 	static async insert(
 		db: DatabaseExecutor,
 		newUser: typeof user.$inferInsert,

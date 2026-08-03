@@ -1,6 +1,7 @@
 import { factory } from "@repo/auth/factory"
 import { dbMiddleware } from "@repo/auth/middleware/db"
 import { loginRoutes } from "@repo/auth/modules/login/login.routes"
+import { meRoutes } from "@repo/auth/modules/me/me.routes"
 import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
 
@@ -21,5 +22,6 @@ const app = factory
 	})
 	.route("/auth", registerRoutes)
 	.route("/auth", loginRoutes)
+	.route("/auth", meRoutes)
 
 export default app
