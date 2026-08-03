@@ -36,7 +36,7 @@ export const loginEmailHandlers = factory.createHandlers(
 			c.env.SERO_POS_JWT_SECRET,
 			{ ipAddress: null, userAgent: null },
 		)
-		await insertSession(db, session)
+		await insertSession(db, { ...session, token: session.id })
 
 		return c.json({
 			message: "ok",

@@ -38,13 +38,10 @@ export const registerEmailHandlers = factory.createHandlers(
 			await db.transaction(async (tx) => {
 				await insertUser(tx, newUser)
 				await insertCredentialAccount(tx, {
-					id: uuidv7(),
-					userId: userId,
+					userId,
 					accountId: userId,
 					providerId: "credential",
 					password: passwordHash,
-					createdAt: now,
-					updatedAt: now,
 				})
 			})
 		} catch (err) {
@@ -59,7 +56,7 @@ export const registerEmailHandlers = factory.createHandlers(
 			c.env.SERO_POS_JWT_SECRET,
 			{ ipAddress: null, userAgent: null },
 		)
-		await insertSession(db, session)
+		await insertSession(db, { ...session, token: session.id })
 
 		return c.json(
 			{

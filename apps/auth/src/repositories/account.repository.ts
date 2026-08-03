@@ -18,7 +18,7 @@ export const findCredentialAccountByUserId = async (
 
 export const insertCredentialAccount = async (
 	db: DatabaseExecutor,
-	newAccount: typeof account.$inferInsert,
+	payload: typeof account.$inferInsert,
 ): Promise<void> => {
-	await db.insert(account).values(newAccount)
+	await db.insert(account).values(payload)
 }
