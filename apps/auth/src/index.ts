@@ -1,17 +1,28 @@
-import { createDatabaseClient } from "@repo/database"
 import { sql } from "drizzle-orm"
-import { Hono } from "hono"
+import { factory } from "./factory"
+import { dbMiddleware } from "./middleware/db"
+import { loginRoutes } from "./modules/login/login.routes"
+import { registerRoutes } from "./modules/register/register.routes"
 
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = factory.createApp()
+
+app.use(dbMiddleware)
+
+app.onError((err, c) => {
+	console.error(err)
+	return c.json({ message: "Internal server error." }, 500)
+})
 
 app.get("/health", async (c) => {
 	try {
-		const db = createDatabaseClient(c.env.SERO_POS_DATABASE_URL)
-		await db.execute(sql`select 1`)
+		await c.var.db.execute(sql`select 1`)
 		return c.json({ status: "ok" })
 	} catch {
 		return c.json({ status: "error" }, 503)
 	}
 })
+
+app.route("/auth", registerRoutes)
+app.route("/auth", loginRoutes)
 
 export default app
