@@ -48,6 +48,7 @@ describe("POST /auth/register/email", () => {
 		expect(body.data.token.accessToken).toEqual(expect.any(String))
 		expect(body.data.token.refreshToken).toEqual(expect.any(String))
 		expect(body.data.token.accessToken).not.toBe(body.data.token.refreshToken)
+		expect(body.data.token.expiresIn).toBe(900)
 	})
 
 	// Case 2 — a 201 looks identical whether or not the child rows were written.
@@ -71,8 +72,8 @@ describe("POST /auth/register/email", () => {
 
 		const sessions = await findSessionsByUserId(userId)
 		expect(sessions).toHaveLength(1)
-		// The session id doubles as the session/refresh token value.
-		expect(sessions[0]?.token).toBe(sessions[0]?.id)
+		// `id` is the stable session identity; `token` is the rotating credential.
+		expect(sessions[0]?.token).not.toBe(sessions[0]?.id)
 		expect(sessions[0]?.expiresAt.getTime()).toBeGreaterThan(Date.now())
 	})
 

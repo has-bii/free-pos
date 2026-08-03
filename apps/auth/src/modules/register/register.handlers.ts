@@ -51,17 +51,20 @@ export const registerEmailHandlers = factory.createHandlers(
 			throw err
 		}
 
-		const { session, accessToken, refreshToken } = await createSession(
-			userId,
-			c.env.SERO_POS_JWT_SECRET,
-			{ ipAddress: null, userAgent: null },
-		)
-		await SessionRepository.insert(db, { ...session, token: session.id })
+		const { session, accessToken, refreshToken, expiresIn } =
+			await createSession(userId, c.env.SERO_POS_JWT_SECRET, {
+				ipAddress: null,
+				userAgent: null,
+			})
+		await SessionRepository.insert(db, session)
 
 		return c.json(
 			{
 				message: "New user has been created",
-				data: { user: newUser, token: { accessToken, refreshToken } },
+				data: {
+					user: newUser,
+					token: { accessToken, refreshToken, expiresIn },
+				},
 			},
 			201,
 		)

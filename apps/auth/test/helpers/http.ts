@@ -29,7 +29,14 @@ export type AuthSuccessBody = {
 	message: string
 	data: {
 		user: UserBody
-		token: { accessToken: string; refreshToken: string }
+		token: { accessToken: string; refreshToken: string; expiresIn: number }
+	}
+}
+
+export type RefreshSuccessBody = {
+	message: string
+	data: {
+		token: { accessToken: string; refreshToken: string; expiresIn: number }
 	}
 }
 

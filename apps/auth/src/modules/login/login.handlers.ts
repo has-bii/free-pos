@@ -31,18 +31,18 @@ export const loginEmailHandlers = factory.createHandlers(
 		)
 		if (!passwordValid) return invalidCredentials()
 
-		const { session, accessToken, refreshToken } = await createSession(
-			foundUser.id,
-			c.env.SERO_POS_JWT_SECRET,
-			{ ipAddress: null, userAgent: null },
-		)
-		await SessionRepository.insert(db, { ...session, token: session.id })
+		const { session, accessToken, refreshToken, expiresIn } =
+			await createSession(foundUser.id, c.env.SERO_POS_JWT_SECRET, {
+				ipAddress: null,
+				userAgent: null,
+			})
+		await SessionRepository.insert(db, session)
 
 		return c.json({
 			message: "ok",
 			data: {
 				user: foundUser,
-				token: { accessToken, refreshToken },
+				token: { accessToken, refreshToken, expiresIn },
 			},
 		})
 	},

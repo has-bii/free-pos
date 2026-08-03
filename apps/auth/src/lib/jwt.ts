@@ -1,6 +1,6 @@
 import jwt from "@tsndr/cloudflare-worker-jwt"
 
-const ACCESS_TOKEN_TTL_SECONDS = 900
+export const ACCESS_TOKEN_TTL_SECONDS = 900
 const REFRESH_TOKEN_TTL_SECONDS = 2_592_000
 
 export type JwtPayload = { sub: string } & Record<string, unknown>

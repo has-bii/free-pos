@@ -45,6 +45,7 @@ describe("POST /auth/login/email", () => {
 		expect(body.data.user.email).toBe(fixture.email)
 		expect(body.data.token.accessToken).toEqual(expect.any(String))
 		expect(body.data.token.refreshToken).toEqual(expect.any(String))
+		expect(body.data.token.expiresIn).toBe(900)
 	})
 
 	// Case 11
@@ -62,7 +63,7 @@ describe("POST /auth/login/email", () => {
 
 		const added = after.find((s) => !before.some((b) => b.id === s.id))
 		expect(added).toBeDefined()
-		expect(added?.token).toBe(added?.id)
+		expect(added?.token).not.toBe(added?.id)
 	})
 
 	// Case 12

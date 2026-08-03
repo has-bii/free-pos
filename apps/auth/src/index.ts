@@ -2,6 +2,7 @@ import { factory } from "@repo/auth/factory"
 import { dbMiddleware } from "@repo/auth/middleware/db"
 import { loginRoutes } from "@repo/auth/modules/login/login.routes"
 import { meRoutes } from "@repo/auth/modules/me/me.routes"
+import { refreshRoutes } from "@repo/auth/modules/refresh/refresh.routes"
 import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
 import { HTTPException } from "hono/http-exception"
@@ -26,6 +27,7 @@ const app = factory
 	})
 	.route("/auth", registerRoutes)
 	.route("/auth", loginRoutes)
+	.route("/auth", refreshRoutes)
 	.route("/auth", meRoutes)
 
 export default app
