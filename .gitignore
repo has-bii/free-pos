@@ -8,3 +8,6 @@ dist
 .env
 .env.*
 !.env.example
+# `!.env.example` matches that exact name only — each additional committed
+# example file needs its own negation.
+!.env.test.example

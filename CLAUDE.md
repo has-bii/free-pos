@@ -16,7 +16,7 @@ pnpm build              # turbo run build
 pnpm dev                # turbo run dev (persistent, e.g. wrangler dev)
 pnpm lint               # turbo run lint (biome check . per package)
 pnpm typecheck          # turbo run typecheck (tsc --noEmit per package)
-pnpm test               # turbo run test (vitest run per package)
+pnpm test               # turbo run test (vitest run per package; apps/auth needs a test DB — see apps/auth/CLAUDE.md)
 pnpm format             # biome format --write . (whole repo)
 ```
 
@@ -43,7 +43,8 @@ There is no top-level `pnpm test` for `packages/database` yet — its `test` scr
 
 - **Biome** (not ESLint/Prettier) is the sole formatter/linter, configured at the root (`biome.json`): tabs, double quotes, semicolons only where needed (`asNeeded`). Run `pnpm format` rather than hand-formatting.
 - **Lefthook** runs on pre-commit (`lefthook.yml`): `biome check --write` on staged JS/TS/JSON files (auto-fixes and re-stages), plus a full `turbo run typecheck` across the monorepo. A commit can fail purely on an unrelated package's type error — run `pnpm typecheck` before committing if unsure.
-- CI (`.github/workflows/ci.yml`) runs `pnpm turbo run lint typecheck test build` on push/PR to `main`. There's no separate CI-only config to keep in sync with.
+- CI (`.github/workflows/ci.yml`) runs `pnpm turbo run lint typecheck test` on push/PR to `main`. There's no separate CI-only config to keep in sync with. The `test` task needs the `TEST_DATABASE_URL` repo secret (a real TiDB test database) — see `apps/auth/CLAUDE.md`.
+- Any env var a turbo task needs must be listed in that task's `env` array in `turbo.json`. Turbo runs in strict env mode, so an undeclared var is silently dropped rather than erroring — `test` declares `TEST_DATABASE_URL` for this reason.
 - Deploy (`.github/workflows/deploy.yml`) triggers on push to a `production` branch and runs `wrangler deploy` for `apps/auth` only — new deployable apps need their own step added here.
 
 ## Workspace/versioning conventions

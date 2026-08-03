@@ -22,5 +22,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The auth route tests run against a real TiDB database. Concurrent runs
+      # are safe: every test mints a unique `t-<uuid>@test.invalid` address and
+      # cleans up after itself, so runs never collide.
+      #
+      # TEST_DATABASE_URL must also be declared in turbo.json's `test` task —
+      # turbo's strict env mode drops anything undeclared, and the suite would
+      # then fail on test/setup.ts's "not set" guard rather than run.
       - name: Lint, typecheck, test
         run: pnpm turbo run lint typecheck test
+        env:
+          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}

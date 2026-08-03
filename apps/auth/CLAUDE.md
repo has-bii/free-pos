@@ -15,7 +15,7 @@ pnpm dev            # wrangler dev, http://localhost:8787
 pnpm deploy          # wrangler deploy
 pnpm lint            # biome check .
 pnpm typecheck       # tsc --noEmit
-pnpm test            # vitest run
+pnpm test            # vitest run — needs .env.test, see Testing below
 pnpm test -- path/to/file.test.ts    # single file
 pnpm test -- -t "name"               # single test by name
 ```
@@ -29,6 +29,36 @@ Copy `.dev.vars.example` to `.dev.vars` and fill in:
 - `SERO_POS_JWT_SECRET` — HS256 signing secret
 
 `worker-configuration.d.ts` is wrangler-generated and declares the `CloudflareBindings` type consumed by `AppEnv` in `src/factory.ts`.
+
+## Testing
+
+`test/` holds HTTP route tests that run the real Worker in workerd (`@cloudflare/vitest-pool-workers`) against a **real TiDB database**. There are no unit tests and no mocks — requests go through the Worker's real entry point via the loopback binding, exercising the whole middleware chain, and assertions check the response *and* the rows that were written.
+
+Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `test/helpers/http.ts`. The `SELF` and `env` exports from `cloudflare:test` do the same thing but are deprecated as of `@cloudflare/vitest-pool-workers@0.20.1` — don't reintroduce them.
+
+### One-time setup
+
+1. Create a database on your TiDB cluster with `test` in its name — e.g. `CREATE DATABASE sero_pos_test;`. The name is not cosmetic: `test/setup.ts` refuses to run against anything else, because teardown issues `DELETE`s.
+2. Apply migrations to it: point `DATABASE_URL` in `packages/database/.env` at the new database and run `pnpm --filter @repo/database db:migrate`. Test runs never perform DDL, so this is manual — after adding a migration, re-run it or the suite fails mid-run with a confusing column-not-found error.
+3. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL` to that same connection string.
+
+`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `SERO_POS_DATABASE_URL` binding and hardcodes `SERO_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key). These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
+
+### Writing tests
+
+- **Every test mints its own email**: `` const email = `t-${crypto.randomUUID()}@test.invalid` `` via `uniqueEmail()`. Nothing is truncated between tests and files run in parallel, so a hardcoded address is a latent flake — reject it in review.
+- Track every email you create and delete it in `afterAll` with `deleteTestUsersByEmail`. Deleting the `user` row cascades to `account` and `session`.
+- Seed fixtures through `registerUser()` (which calls the real `POST /auth/register/email`), never by inserting rows. `test/helpers/db.ts` is for teardown and assertions only.
+- Registering costs a real 50,000-iteration PBKDF2 hash plus TiDB round-trips, so share one fixture per file via `beforeAll` where the test doesn't need a fresh user. Timeouts are raised to 20s for this reason.
+- If a run is killed mid-suite, `t-*@test.invalid` rows survive. Harmless; clear them with `DELETE FROM user WHERE email LIKE 't-%@test.invalid'`.
+
+### Known limits
+
+- **Runs in CI** against the same kind of test database, via the `TEST_DATABASE_URL` repo secret. Two things to know: the var must stay declared in `turbo.json`'s `test` task (turbo's strict env mode drops undeclared vars *silently*, and the suite would fail on the "not set" guard), and PRs from forks don't get repo secrets, so the suite fails there by design.
+- **Migrations are not applied by CI.** Test runs never perform DDL, so a PR that adds a migration fails CI until the test database is migrated by hand (`DATABASE_URL` → test DB, `pnpm --filter @repo/database db:migrate`). Do that before pushing the migration.
+- `pnpm typecheck` *does* cover `test/` (one `tsc --noEmit` pass over the package), so a broken test still fails the lefthook pre-commit hook.
+- `vitest.config.ts` re-declares the `@repo/auth/*` → `src/*` mapping as a Vite `resolve.alias`, because Vite does not read tsconfig `paths` the way wrangler's bundler does. Keep the two in sync.
+- Deliberate coverage gaps (`verifyRefreshToken`, `verifyPassword`'s early returns, the `/health` 503 branch, `onError`, the `EmailAlreadyExistsError` race) are catalogued in `docs/prd/auth-route-tests.md` §7 with what it would take to close each.
 
 ## Structure
 

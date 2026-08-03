@@ -21,8 +21,10 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "catalog:",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "catalog:",
+		"dotenv": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:",
 		"wrangler": "catalog:"
