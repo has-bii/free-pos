@@ -16,19 +16,12 @@ export const refreshHandlers = factory.createHandlers(validate("json", refreshSc
 	const payload = await JWT.verifyRefreshToken(refreshToken, c.env.SERO_POS_JWT_SECRET)
 	if (!payload) return invalidToken()
 
-	// `jti` and `sid` are `unknown` on JwtPayload's index signature. A
-	// token lacking either predates this feature or was hand-crafted.
-	const { jti, sid } = payload
-	if (typeof jti !== "string" || typeof sid !== "string") {
-		return invalidToken()
-	}
-
-	const rotated = await Session.rotateSession(payload.sub, sid, c.env.SERO_POS_JWT_SECRET)
+	const rotated = await Session.rotateSession(payload.sub, payload.sid, c.env.SERO_POS_JWT_SECRET)
 
 	// The `userId` predicate is the `sub === session.user_id` invariant
 	// folded into the CAS, so it costs no extra query.
 	const swapped = await SessionRepository.rotateToken(db, {
-		currentToken: jti,
+		currentToken: payload.jti,
 		userId: payload.sub,
 		nextToken: rotated.token,
 		expiresAt: rotated.expiresAt,
