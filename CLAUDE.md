@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Currently contains a single Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless).
+Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Currently contains a single Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests).
 
 ## Commands
 
@@ -34,7 +34,7 @@ Each app/package's own `CLAUDE.md` documents its package-specific scripts (e.g. 
 
 ## Workspace/versioning conventions
 
-- Internal packages are referenced as `@repo/<name>` via `workspace:*` in `package.json` and consumed with subpath imports mapped through each package's `tsconfig.json` `paths` (e.g. `@repo/auth/factory` → `apps/auth/src/factory.ts`). When adding a new internal module, you generally don't need a barrel/index re-export — import the concrete path directly.
+- Internal packages are referenced as `@repo/<name>` via `workspace:*` in `package.json` and consumed with subpath imports mapped through each package's `tsconfig.json` `paths` (e.g. `@repo/auth/factory` → `apps/auth/src/factory.ts`, a package importing its own modules). The same mapping style is used for cross-package imports too — e.g. `apps/auth`'s `tsconfig.json` maps `@repo/auth-kit/*` to `../../packages/auth-kit/src/*` so it can import `@repo/auth-kit/jwt`, `@repo/auth-kit/cookies`, etc. Since wrangler's bundler reads tsconfig `paths` but Vite does not, any package with a Vite-based `vitest.config.ts` must mirror the same mapping as a `resolve.alias` — see the comment in `apps/auth/vitest.config.ts`. When adding a new internal module, you generally don't need a barrel/index re-export — import the concrete path directly.
 - Shared third-party dependency versions are pinned once in `pnpm-workspace.yaml` under `catalog:` and referenced from each package.json as `"catalog:"`. Add new shared deps there rather than hardcoding a version in a package.
 - `packages/typescript-config` is the single source of `tsconfig` compiler options (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ESNext/bundler resolution); every package's `tsconfig.json` just extends `@repo/typescript-config/base.json` and adds its own `paths`.
 

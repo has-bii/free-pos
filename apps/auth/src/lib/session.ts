@@ -1,5 +1,5 @@
+import { JWT } from "@repo/auth-kit/jwt"
 import { uuidv7 } from "uuidv7"
-import { JWT } from "./jwt"
 
 type IssuedTokens = {
 	accessToken: string

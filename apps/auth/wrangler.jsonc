@@ -8,6 +8,13 @@
 	"observability": {
 		"enabled": true
 	},
+	// Non-secret, so committed here (unlike SERO_POS_DATABASE_URL/SERO_POS_JWT_SECRET,
+	// which are real secrets configured out-of-band and never appear in this file).
+	// `.dev.vars` overrides both for local dev — see .dev.vars.example.
+	"vars": {
+		"SERO_POS_FRONTEND_ORIGIN": "https://app.sero-pos.com",
+		"SERO_POS_COOKIE_DOMAIN": ".sero-pos.com"
+	},
 	"dev": {
 		"port": 8787
 	}

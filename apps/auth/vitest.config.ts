@@ -4,16 +4,20 @@ import { defineConfig } from "vitest/config"
 
 loadEnv({ path: ".env.test", quiet: true })
 
-// `wrangler dev`/`deploy` resolve the `@repo/auth/*` subpath imports from
-// tsconfig `paths`, but Vite does not read those. Mirror the single mapping in
-// tsconfig.json here; keep the two in sync.
+// `wrangler dev`/`deploy` resolve the `@repo/auth/*` and `@repo/auth-kit/*`
+// subpath imports from tsconfig `paths`, but Vite does not read those. Mirror
+// both mappings in tsconfig.json here; keep them in sync.
 // `import.meta.dirname` rather than `fileURLToPath`: this package's tsconfig
 // pulls in both the workerd and Node `URL` types, and they are not assignable.
 const srcDir = `${import.meta.dirname}/src/`
+const authKitSrcDir = `${import.meta.dirname}/../../packages/auth-kit/src/`
 
 export default defineConfig({
 	resolve: {
-		alias: [{ find: /^@repo\/auth\//, replacement: srcDir }],
+		alias: [
+			{ find: /^@repo\/auth\//, replacement: srcDir },
+			{ find: /^@repo\/auth-kit\//, replacement: authKitSrcDir },
+		],
 	},
 	plugins: [
 		cloudflareTest({
@@ -24,6 +28,10 @@ export default defineConfig({
 					// token, which requires knowing the signing key.
 					SERO_POS_JWT_SECRET: "test-jwt-secret-do-not-use-in-production",
 					SERO_POS_DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+					SERO_POS_FRONTEND_ORIGIN: "https://app.test.invalid",
+					// Empty, like local dev: exercises the host-only cookie path rather
+					// than pinning assertions to the prod `.sero-pos.com` value.
+					SERO_POS_COOKIE_DOMAIN: "",
 				},
 			},
 		}),

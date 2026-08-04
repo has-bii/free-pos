@@ -1,8 +1,14 @@
+import type { AppEnv } from "@repo/auth/factory"
 import { factory } from "@repo/auth/factory"
-import { requireAuth } from "@repo/auth/middleware/auth"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
+import { clearAuthCookies } from "@repo/auth-kit/cookies"
+import { requireAuth } from "@repo/auth-kit/middleware/auth"
 
-export const logoutHandlers = factory.createHandlers(requireAuth, async (c) => {
-	await SessionRepository.deleteById(c.var.db, c.var.sessionId, c.var.userId)
-	return c.json({ message: "Logged out." })
-})
+export const logoutHandlers = factory.createHandlers(
+	requireAuth<AppEnv>((c) => c.env.SERO_POS_JWT_SECRET),
+	async (c) => {
+		await SessionRepository.deleteById(c.var.db, c.var.sessionId, c.var.userId)
+		clearAuthCookies(c, { cookieDomain: c.env.SERO_POS_COOKIE_DOMAIN })
+		return c.json({ message: "Logged out." })
+	},
+)

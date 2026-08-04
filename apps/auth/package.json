@@ -13,8 +13,8 @@
 	},
 	"dependencies": {
 		"@hono/valibot-validator": "catalog:",
+		"@repo/auth-kit": "workspace:*",
 		"@repo/database": "workspace:*",
-		"@tsndr/cloudflare-worker-jwt": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
 		"uuidv7": "catalog:",
@@ -23,6 +23,7 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "catalog:",
 		"@repo/typescript-config": "workspace:*",
+		"@tsndr/cloudflare-worker-jwt": "catalog:",
 		"@types/node": "catalog:",
 		"dotenv": "catalog:",
 		"typescript": "catalog:",

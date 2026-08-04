@@ -1,17 +1,25 @@
 import { factory } from "@repo/auth/factory"
-import { JWT } from "@repo/auth/lib/jwt"
 import { Session } from "@repo/auth/lib/session"
-import { validate } from "@repo/auth/middleware/validate"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
-import { refreshSchema } from "./refresh.schema"
+import { clearAuthCookies, REFRESH_TOKEN_COOKIE_NAME, setAuthCookies } from "@repo/auth-kit/cookies"
+import { JWT } from "@repo/auth-kit/jwt"
+import { getCookie } from "hono/cookie"
 
-export const refreshHandlers = factory.createHandlers(validate("json", refreshSchema), async (c) => {
-	const { refreshToken } = c.req.valid("json")
+export const refreshHandlers = factory.createHandlers(async (c) => {
 	const db = c.var.db
+	const cookieDomain = c.env.SERO_POS_COOKIE_DOMAIN
 
 	// One message for every cause: the client's action is always the same,
-	// and distinguishing them would leak whether a session exists.
-	const invalidToken = () => c.json({ message: "Invalid or expired refresh token." }, 401)
+	// and distinguishing them would leak whether a session exists. A dead
+	// refresh token must not linger in the browser for up to 30 days, so every
+	// failure clears both cookies too.
+	const invalidToken = () => {
+		clearAuthCookies(c, { cookieDomain })
+		return c.json({ message: "Invalid or expired refresh token." }, 401)
+	}
+
+	const refreshToken = getCookie(c, REFRESH_TOKEN_COOKIE_NAME)
+	if (!refreshToken) return invalidToken()
 
 	const payload = await JWT.verifyRefreshToken(refreshToken, c.env.SERO_POS_JWT_SECRET)
 	if (!payload) return invalidToken()
@@ -28,14 +36,7 @@ export const refreshHandlers = factory.createHandlers(validate("json", refreshSc
 	})
 	if (!swapped) return invalidToken()
 
-	return c.json({
-		message: "ok",
-		data: {
-			token: {
-				accessToken: rotated.accessToken,
-				refreshToken: rotated.refreshToken,
-				expiresIn: rotated.expiresIn,
-			},
-		},
-	})
+	setAuthCookies(c, { accessToken: rotated.accessToken, refreshToken: rotated.refreshToken }, { cookieDomain })
+
+	return c.json({ message: "ok" })
 })

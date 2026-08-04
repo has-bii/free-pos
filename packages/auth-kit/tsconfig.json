@@ -1,0 +1,10 @@
+{
+	"extends": "@repo/typescript-config/base.json",
+	"compilerOptions": {
+		"types": ["node"],
+		"paths": {
+			"@repo/auth-kit/*": ["./src/*"]
+		}
+	},
+	"include": ["src", "test"]
+}

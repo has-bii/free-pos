@@ -2,7 +2,8 @@
 	"extends": "@repo/typescript-config/base.json",
 	"compilerOptions": {
 		"paths": {
-			"@repo/auth/*": ["./src/*"]
+			"@repo/auth/*": ["./src/*"],
+			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"]
 		},
 		"types": [
 			"./worker-configuration.d.ts",

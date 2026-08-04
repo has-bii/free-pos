@@ -1,3 +1,4 @@
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from "@repo/auth-kit/cookies"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { deleteTestUsersByEmail, findSessionsByUserId } from "../helpers/db"
 import {
@@ -33,7 +34,7 @@ beforeAll(async () => {
 
 describe("POST /auth/login/email", () => {
 	// Case 10
-	it("returns the user and a token pair for correct credentials", async () => {
+	it("returns the user and sets auth cookies for correct credentials", async () => {
 		const res = await postJson(PATH, {
 			email: fixture.email,
 			password: fixture.password,
@@ -43,9 +44,11 @@ describe("POST /auth/login/email", () => {
 		const body = await readJson<AuthSuccessBody>(res)
 		expect(body.data.user.id).toBe(fixture.user.id)
 		expect(body.data.user.email).toBe(fixture.email)
-		expect(body.data.token.accessToken).toEqual(expect.any(String))
-		expect(body.data.token.refreshToken).toEqual(expect.any(String))
-		expect(body.data.token.expiresIn).toBe(900)
+		expect(body).not.toHaveProperty("data.token")
+
+		const cookies = res.headers.getSetCookie()
+		expect(cookies.some((c) => c.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`))).toBe(true)
+		expect(cookies.some((c) => c.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`))).toBe(true)
 	})
 
 	// Case 11

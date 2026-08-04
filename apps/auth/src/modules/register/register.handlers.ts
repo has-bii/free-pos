@@ -6,6 +6,7 @@ import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
 import { UserRepository } from "@repo/auth/repositories/user.repository"
+import { setAuthCookies } from "@repo/auth-kit/cookies"
 import type { user } from "@repo/database"
 import { uuidv7 } from "uuidv7"
 import { registerEmailSchema } from "./register.schema"
@@ -49,17 +50,18 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 		throw err
 	}
 
-	const { session, accessToken, refreshToken, expiresIn } = await Session.createSession(
-		userId,
-		c.env.SERO_POS_JWT_SECRET,
-		{ ipAddress: null, userAgent: null },
-	)
+	const { session, accessToken, refreshToken } = await Session.createSession(userId, c.env.SERO_POS_JWT_SECRET, {
+		ipAddress: null,
+		userAgent: null,
+	})
 	await SessionRepository.insert(db, session)
+
+	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.SERO_POS_COOKIE_DOMAIN })
 
 	return c.json(
 		{
 			message: "New user has been created",
-			data: { user: newUser, token: { accessToken, refreshToken, expiresIn } },
+			data: { user: newUser },
 		},
 		201,
 	)

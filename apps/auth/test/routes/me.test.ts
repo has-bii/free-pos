@@ -1,8 +1,18 @@
 import { env } from "cloudflare:workers"
+import { ACCESS_TOKEN_COOKIE_NAME } from "@repo/auth-kit/cookies"
+import { JWT } from "@repo/auth-kit/jwt"
 import jwt from "@tsndr/cloudflare-worker-jwt"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { deleteTestUsersByEmail } from "../helpers/db"
-import { bearer, get, type MeSuccessBody, type MessageBody, readJson, registerUser, uniqueEmail } from "../helpers/http"
+import {
+	cookieHeader,
+	get,
+	type MeSuccessBody,
+	type MessageBody,
+	readJson,
+	registerUser,
+	uniqueEmail,
+} from "../helpers/http"
 
 const createdEmails: string[] = []
 const track = (email: string) => {
@@ -17,9 +27,13 @@ afterAll(async () => {
 const PATH = "/auth/me"
 
 let fixture: Awaited<ReturnType<typeof registerUser>>
+let accessToken: string
 
 beforeAll(async () => {
 	fixture = await registerUser({ email: track(uniqueEmail()) })
+	const token = fixture.client.jar.get(ACCESS_TOKEN_COOKIE_NAME)
+	if (!token) throw new Error("expected register to set an access token cookie")
+	accessToken = token
 })
 
 const expectUnauthorized = async (res: Response) => {
@@ -29,8 +43,8 @@ const expectUnauthorized = async (res: Response) => {
 
 describe("GET /auth/me", () => {
 	// Case 17
-	it("returns the current user for a valid access token", async () => {
-		const res = await get(PATH, bearer(fixture.token.accessToken))
+	it("returns the current user for a valid access token cookie", async () => {
+		const res = await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, accessToken))
 		expect(res.status).toBe(200)
 
 		const body = await readJson<MeSuccessBody>(res)
@@ -39,47 +53,37 @@ describe("GET /auth/me", () => {
 	})
 
 	// Case 18
-	it("rejects a request with no Authorization header", async () => {
+	it("rejects a request with no access token cookie", async () => {
 		await expectUnauthorized(await get(PATH))
 	})
 
 	// Case 19
-	it("rejects a non-bearer scheme", async () => {
-		await expectUnauthorized(await get(PATH, { Authorization: "Basic abc123" }))
+	it("rejects an empty cookie value", async () => {
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, "")))
 	})
 
-	// Case 20 — covers the `rest.length > 0` branch in middleware/auth.ts.
-	it("rejects a header with extra segments", async () => {
-		await expectUnauthorized(
-			await get(PATH, {
-				Authorization: `Bearer ${fixture.token.accessToken} extra`,
-			}),
-		)
-	})
-
-	// Case 21
-	it("rejects an empty bearer token", async () => {
-		await expectUnauthorized(await get(PATH, { Authorization: "Bearer " }))
-	})
-
-	// Case 22
+	// Case 20
 	it("rejects a garbage token", async () => {
-		await expectUnauthorized(await get(PATH, bearer("not-a-real-token")))
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, "not-a-real-token")))
 	})
 
-	// Case 22b — well-formed but signed with the wrong key.
+	// Case 21 — well-formed but signed with the wrong key.
 	it("rejects a token with a bad signature", async () => {
 		const forged = await jwt.sign({ sub: fixture.user.id, type: "access" }, "not-the-real-signing-secret", "HS256")
-		await expectUnauthorized(await get(PATH, bearer(forged)))
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, forged)))
 	})
 
-	// Case 23 — refresh tokens live 30 days against the access token's 15
+	// Case 22 — refresh tokens live 30 days against the access token's 15
 	// minutes, so accepting one here would be a real privilege escalation.
-	it("rejects a refresh token used as a bearer token", async () => {
-		await expectUnauthorized(await get(PATH, bearer(fixture.token.refreshToken)))
+	it("rejects a refresh token used as an access token", async () => {
+		const refreshToken = await JWT.signRefreshToken(
+			{ sub: fixture.user.id, sid: fixture.user.id, jti: "irrelevant" },
+			env.SERO_POS_JWT_SECRET,
+		)
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, refreshToken)))
 	})
 
-	// Case 24 — the secret comes from the binding rather than a second copy of
+	// Case 23 — the secret comes from the binding rather than a second copy of
 	// the literal in vitest.config.ts, so the two cannot drift.
 	it("rejects an expired access token", async () => {
 		const expired = await jwt.sign(
@@ -91,19 +95,21 @@ describe("GET /auth/me", () => {
 			env.SERO_POS_JWT_SECRET,
 			"HS256",
 		)
-		await expectUnauthorized(await get(PATH, bearer(expired)))
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, expired)))
 	})
 
-	// Case 25 — covers `!foundUser` in me.handlers.ts, which is otherwise dead
+	// Case 24 — covers `!foundUser` in me.handlers.ts, which is otherwise dead
 	// code: requireAuth never touches the DB, so the token stays valid.
 	it("rejects a valid token whose user has been deleted", async () => {
 		const deleted = await registerUser({ email: track(uniqueEmail()) })
+		const deletedAccessToken = deleted.client.jar.get(ACCESS_TOKEN_COOKIE_NAME)
+		if (!deletedAccessToken) throw new Error("expected register to set an access token cookie")
 
-		const before = await get(PATH, bearer(deleted.token.accessToken))
+		const before = await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, deletedAccessToken))
 		expect(before.status).toBe(200)
 
 		await deleteTestUsersByEmail([deleted.email])
 
-		await expectUnauthorized(await get(PATH, bearer(deleted.token.accessToken)))
+		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, deletedAccessToken)))
 	})
 })

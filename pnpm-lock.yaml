@@ -81,12 +81,12 @@ importers:
       '@hono/valibot-validator':
         specifier: 'catalog:'
         version: 0.6.1(hono@4.12.33)(valibot@1.4.2(typescript@7.0.2))
+      '@repo/auth-kit':
+        specifier: workspace:*
+        version: link:../../packages/auth-kit
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@tsndr/cloudflare-worker-jwt':
-        specifier: 'catalog:'
-        version: 3.2.1
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@cloudflare/workers-types@5.20260731.1)(@tidbcloud/serverless@0.3.0)(mysql2@3.23.2(@types/node@24.13.3))
@@ -106,6 +106,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@tsndr/cloudflare-worker-jwt':
+        specifier: 'catalog:'
+        version: 3.2.1
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
@@ -121,6 +124,28 @@ importers:
       wrangler:
         specifier: 'catalog:'
         version: 4.117.0(@cloudflare/workers-types@5.20260731.1)
+
+  packages/auth-kit:
+    dependencies:
+      '@tsndr/cloudflare-worker-jwt':
+        specifier: 'catalog:'
+        version: 3.2.1
+      hono:
+        specifier: 'catalog:'
+        version: 4.12.33
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.3
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@24.13.3)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(tsx@4.23.1))
 
   packages/database:
     dependencies:

@@ -1,3 +1,4 @@
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from "@repo/auth-kit/cookies"
 import { afterAll, describe, expect, it } from "vitest"
 import { deleteTestUsersByEmail, findAccountsByUserId, findSessionsByUserId, findUserByEmail } from "../helpers/db"
 import {
@@ -31,7 +32,7 @@ const validBody = (email: string) => ({
 
 describe("POST /auth/register/email", () => {
 	// Case 1
-	it("creates a user and returns a token pair", async () => {
+	it("creates a user and sets httpOnly auth cookies, never a token in the body", async () => {
 		const email = track(uniqueEmail())
 
 		const res = await postJson(PATH, validBody(email))
@@ -40,10 +41,19 @@ describe("POST /auth/register/email", () => {
 		const body = await readJson<AuthSuccessBody>(res)
 		expect(body.data.user).toMatchObject({ email, name: "Test User" })
 		expect(body.data.user.id).toEqual(expect.any(String))
-		expect(body.data.token.accessToken).toEqual(expect.any(String))
-		expect(body.data.token.refreshToken).toEqual(expect.any(String))
-		expect(body.data.token.accessToken).not.toBe(body.data.token.refreshToken)
-		expect(body.data.token.expiresIn).toBe(900)
+		expect(body).not.toHaveProperty("data.token")
+
+		const cookies = res.headers.getSetCookie()
+		const access = cookies.find((c) => c.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`))
+		const refresh = cookies.find((c) => c.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`))
+		expect(access).toBeDefined()
+		expect(refresh).toBeDefined()
+		expect(access?.split("; ")).toEqual(
+			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/", "Max-Age=900"]),
+		)
+		expect(refresh?.split("; ")).toEqual(
+			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/auth/refresh", "Max-Age=2592000"]),
+		)
 	})
 
 	// Case 2 — a 201 looks identical whether or not the child rows were written.

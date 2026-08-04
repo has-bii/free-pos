@@ -5,6 +5,7 @@ import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
 import { UserRepository } from "@repo/auth/repositories/user.repository"
+import { setAuthCookies } from "@repo/auth-kit/cookies"
 import { loginEmailSchema } from "./login.schema"
 
 export const loginEmailHandlers = factory.createHandlers(validate("json", loginEmailSchema), async (c) => {
@@ -22,18 +23,16 @@ export const loginEmailHandlers = factory.createHandlers(validate("json", loginE
 	const passwordValid = await Password.verifyPassword(password, credentialAccount.password)
 	if (!passwordValid) return invalidCredentials()
 
-	const { session, accessToken, refreshToken, expiresIn } = await Session.createSession(
-		foundUser.id,
-		c.env.SERO_POS_JWT_SECRET,
-		{ ipAddress: null, userAgent: null },
-	)
+	const { session, accessToken, refreshToken } = await Session.createSession(foundUser.id, c.env.SERO_POS_JWT_SECRET, {
+		ipAddress: null,
+		userAgent: null,
+	})
 	await SessionRepository.insert(db, session)
+
+	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.SERO_POS_COOKIE_DOMAIN })
 
 	return c.json({
 		message: "ok",
-		data: {
-			user: foundUser,
-			token: { accessToken, refreshToken, expiresIn },
-		},
+		data: { user: foundUser },
 	})
 })
