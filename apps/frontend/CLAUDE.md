@@ -6,7 +6,7 @@ See the root `CLAUDE.md` first for monorepo-wide commands and conventions. This 
 
 ## What this is
 
-`@repo/frontend`: client-side SPA built with Vite + React 19 + TanStack Router, no server component (no TanStack Start, no SSR). Renders entirely in the browser off a static bundle. Not yet wired to `apps/auth` or deployed anywhere — this is scaffolding only; see the deploy target decision (Cloudflare Pages vs Workers static assets) as a separate, not-yet-made call before adding `wrangler.jsonc`/`deploy.yml` steps here.
+`@repo/frontend`: client-side SPA built with Vite + React 19 + TanStack Router, no server component (no TanStack Start, no SSR). Renders entirely in the browser off a static bundle. Not yet wired to `apps/auth` (no API calls yet) — but deployed as a Cloudflare Workers static-assets Worker (`sero-pos-frontend`), see Deploying below.
 
 ## Commands
 
@@ -20,6 +20,10 @@ pnpm test            # no-op — no tests yet
 ```
 
 Run these from `apps/frontend/`, or from the repo root with `pnpm --filter @repo/frontend <script>`.
+
+## Deploying
+
+Deployed as a static-assets-only Cloudflare Worker (`sero-pos-frontend`, `wrangler.jsonc`) — no `main`/Worker script, since this app has no server code: `assets.directory` points at the Vite `dist/` build, and `assets.not_found_handling: "single-page-application"` serves `index.html` for unmatched routes so client-side routing works. Deployed from the `production` branch via a `deploy-frontend` job in `.github/workflows/deploy.yml`, parallel to (not dependent on) `apps/auth`'s deploy job — the two are independent artifacts with nothing to coordinate (no shared migration step). The production custom domain (`app.sero-pos.com`) is attached to the Worker manually via the Cloudflare dashboard rather than declared in `wrangler.jsonc`, mirroring how `apps/auth`'s `auth.sero-pos.com` is attached — see that app's `CLAUDE.md`. No PR preview deployments yet.
 
 ## Routing
 

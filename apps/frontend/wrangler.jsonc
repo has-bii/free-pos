@@ -1,0 +1,12 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sero-pos-frontend",
+	"compatibility_date": "2026-08-04",
+	// No `main` — this is a static-assets-only Worker, no server code.
+	// Custom domain (app.sero-pos.com) is attached manually via the Cloudflare
+	// dashboard, same as sero-pos-auth's auth.sero-pos.com — not configured here.
+	"assets": {
+		"directory": "./dist",
+		"not_found_handling": "single-page-application"
+	}
+}

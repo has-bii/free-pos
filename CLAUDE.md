@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Contains a Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests). It also contains `apps/frontend`, a client-side SPA (Vite + React + TanStack Router, no server component) that consumes the shared shadcn/ui component library in `packages/ui`; `apps/frontend` is not yet wired to `apps/auth` or deployed anywhere.
+Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Contains a Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests). It also contains `apps/frontend`, a client-side SPA (Vite + React + TanStack Router, no server component) that consumes the shared shadcn/ui component library in `packages/ui`, deployed as a static-assets-only Cloudflare Worker; `apps/frontend` is not yet wired to `apps/auth` (no API calls yet).
 
 ## Commands
 
@@ -31,7 +31,7 @@ Each app/package's own `CLAUDE.md` documents its package-specific scripts (e.g. 
 - **Lefthook** runs on pre-commit (`lefthook.yml`): `biome check --write` on staged JS/TS/JSON files (auto-fixes and re-stages), plus a full `turbo run typecheck` across the monorepo. A commit can fail purely on an unrelated package's type error — run `pnpm typecheck` before committing if unsure.
 - CI (`.github/workflows/ci.yml`) runs `pnpm turbo run lint typecheck test` on push/PR to `main`. There's no separate CI-only config to keep in sync with. The `test` task needs the `TEST_DATABASE_URL` repo secret (a real TiDB test database) — see `apps/auth/CLAUDE.md`.
 - Any env var a turbo task needs must be listed in that task's `env` array in `turbo.json`. Turbo runs in strict env mode, so an undeclared var is silently dropped rather than erroring — `test` declares `TEST_DATABASE_URL` for this reason.
-- Deploy (`.github/workflows/deploy.yml`) triggers on push to a `production` branch: applies pending `@repo/database` migrations to the production DB (via the `PRODUCTION_DATABASE_URL` repo secret), then runs `wrangler deploy` for `apps/auth` only — new deployable apps need their own steps added here.
+- Deploy (`.github/workflows/deploy.yml`) triggers on push to a `production` branch, running two independent jobs: `deploy` applies pending `@repo/database` migrations to the production DB (via the `PRODUCTION_DATABASE_URL` repo secret) then runs `wrangler deploy` for `apps/auth`; `deploy-frontend` builds and deploys `apps/frontend` as a static-assets Worker. The two don't depend on each other — new deployable apps need their own job added here.
 
 ## Workspace/versioning conventions
 
