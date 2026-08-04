@@ -69,11 +69,29 @@ src/
   errors.ts                 # typed domain errors (e.g. EmailAlreadyExistsError)
   lib/                      # framework-agnostic helpers: jwt.ts, password.ts, session.ts, request.ts
   middleware/                # db.ts (attaches c.var.db), auth.ts (requireAuth), validate.ts (valibot)
-  modules/<name>/            # *.schema.ts, *.handlers.ts, *.routes.ts — see root CLAUDE.md for the pattern
+  modules/<name>/            # *.schema.ts, *.handlers.ts, *.routes.ts — see Module layout below
   repositories/*.repository.ts   # only code that imports Drizzle tables from @repo/database
 ```
 
 Adding a new authenticated endpoint: create a `modules/<name>/` following the `me` module as the minimal template (`requireAuth` in `createHandlers`, no request body validation needed) or `register`/`login` for one that validates a JSON body and touches multiple repositories in a transaction.
+
+## Module layout (per feature, e.g. `modules/register/`)
+
+- `*.schema.ts` — valibot input schema.
+- `*.handlers.ts` — `factory.createHandlers(validate(...), async (c) => ...)`; business logic lives here, talking to repositories, never to Drizzle tables directly.
+- `*.routes.ts` — thin: `factory.createApp().post("/path", ...handlers)`, mounted in `src/index.ts` via `.route("/auth", xRoutes)`.
+
+## Repositories (`src/repositories/*.repository.ts`)
+
+Static-method classes (`abstract class X { static async ... }`) that are the *only* code allowed to import Drizzle table objects from `@repo/database` and run queries. They accept a `DatabaseExecutor` (`Database | Transaction`, defined in `factory.ts`) so the same method works inside or outside a `db.transaction(...)` — see `register.handlers.ts` for a multi-table transaction (`user` + `account` insert) example. DB-level constraint violations (e.g. duplicate email) are translated into typed errors (`src/errors.ts`, e.g. `EmailAlreadyExistsError`) at the repository boundary, not left as raw driver errors for handlers to inspect.
+
+## Auth flow
+
+- Passwords: PBKDF2-SHA256 via Web Crypto, implemented in `src/lib/password.ts`. Iteration count is deliberately capped for the Workers free-tier 10ms CPU budget — see the comment there before changing `ITERATIONS`.
+- Tokens: short-lived access token + long-lived refresh token, both HS256 JWTs (`src/lib/jwt.ts`, using `@tsndr/cloudflare-worker-jwt`). Refresh token TTL must stay in sync with the `session` row's `expiresAt` — see the comment in `src/lib/session.ts`.
+- Sessions are rows in the `session` table keyed by a `uuidv7` id, which doubles as the session/refresh token value (`SessionRepository.insert(db, { ...session, token: session.id })`).
+- `requireAuth` middleware (`src/middleware/auth.ts`) validates the `Authorization: Bearer <token>` header against the access token and sets `c.var.userId`; it does not touch the DB. Handlers needing the full user row still look it up via `UserRepository.findById`.
+- `requestMeta(c)` (`src/lib/request.ts`) extracts `CF-Connecting-IP` / `User-Agent` for session metadata.
 
 ## Conventions specific to this app
 
