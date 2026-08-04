@@ -24,6 +24,12 @@ catalogs:
     '@tailwindcss/vite':
       specifier: 4.3.3
       version: 4.3.3
+    '@tanstack/react-form':
+      specifier: 1.33.3
+      version: 1.33.3
+    '@tanstack/react-query':
+      specifier: 5.101.4
+      version: 5.101.4
     '@tanstack/react-router':
       specifier: 1.170.18
       version: 1.170.18
@@ -184,6 +190,12 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tanstack/react-form':
+        specifier: 'catalog:'
+        version: 1.33.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.101.4(react@19.2.8)
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -193,6 +205,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.8(react@19.2.8)
+      valibot:
+        specifier: 'catalog:'
+        version: 1.4.2(typescript@7.0.2)
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
@@ -1415,9 +1430,38 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/devtools-event-client@0.4.4':
+    resolution: {integrity: sha512-6T5Yop/793YI+H+5J8Hsyj4kCih9sl4t3ElLgKioW5hk3ocn+ZdSJ94tT7vL7uabxSugWYBZlOTMPzEw2puvQw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  '@tanstack/form-core@1.33.3':
+    resolution: {integrity: sha512-htLxe/50GpUxbi2arJleh6uQkw72UOy+3Q0d1AadO3lfBTjs1e51GzyrKk/w8I7qXSkaSnF/JbYlyE+cwbJGNw==}
+
   '@tanstack/history@1.162.0':
     resolution: {integrity: sha512-79pf/RkhteYZTRgcR4F9kbk84P2N8rugQJswxfIqovlbRiT3yI7eBE+5QorIrZaOKktsgzRlXh1l/du/xpl4iA==}
     engines: {node: '>=20.19'}
+
+  '@tanstack/pacer-lite@0.1.1':
+    resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
+    engines: {node: '>=18'}
+
+  '@tanstack/query-core@5.101.4':
+    resolution: {integrity: sha512-gNwcvOJcRbLWPOLG/2OBm+zM+Yv+MKsXKEOWC57USuZDEsI71hEErQsiEGx5wX9rzWWkfwM0fVSPoiIFSsxfiw==}
+
+  '@tanstack/react-form@1.33.3':
+    resolution: {integrity: sha512-lkzI/y15fHC8lKvzsLXFLLqGWroa+okvV2cKRCGAL+d0Kdf040fdMZbKh6uCXDMc08Ngpl8G3VZFnZ5KVUkUIw==}
+    peerDependencies:
+      '@tanstack/react-start': '*'
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@tanstack/react-start':
+        optional: true
+
+  '@tanstack/react-query@5.101.4':
+    resolution: {integrity: sha512-yRg2pfOCxIs4ZJW3XYYHU/WgtD04FHSnfHlpRT7h7pR77hwkdRG4wxbKe4aq6P0RvXUTBSQpQeadS1SUYUe+KA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tanstack/react-router@1.170.18':
     resolution: {integrity: sha512-wpbGYZEp/fmz1q4bn7BD8VZ+/VZ7GBqSJv5V969pU+chP8y7dquWDmKTFMohvUegb9lg12m1uPVvD6kB2wORvQ==}
@@ -1425,6 +1469,12 @@ packages:
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
+
+  '@tanstack/react-store@0.11.0':
+    resolution: {integrity: sha512-tX4YXh3PDkmpvGQWkWqKpzs/MSqbtuwY9dWdWhtV9Q50PmO+jOkUKIWIX4G85dwt7lxdHLXsiaEKPdKmC8F41w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   '@tanstack/react-store@0.9.3':
     resolution: {integrity: sha512-y2iHd/N9OkoQbFJLUX1T9vbc2O9tjH0pQRgTcx1/Nz4IlwLvkgpuglXUx+mXt0g5ZDFrEeDnONPqkbfxXJKwRg==}
@@ -1464,6 +1514,9 @@ packages:
   '@tanstack/router-utils@1.162.2':
     resolution: {integrity: sha512-hTWqJtqIFFdvuCl8WXNyrodp2L9zo2G37xKRrcVmVRWpAB2h+U1LuRAfS4tsFTiWOIoE/B+WDVFB8JpoEdw6jQ==}
     engines: {node: '>=20.19'}
+
+  '@tanstack/store@0.11.0':
+    resolution: {integrity: sha512-WlzzCt3xi0G6pCAJu1U+2jiECwabETDpQDi3hfkFZvJii9AuZqEKbOiVarX1/bWhTNjU486yQtJCCasi/0q+Cw==}
 
   '@tanstack/store@0.9.3':
     resolution: {integrity: sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw==}
@@ -3326,7 +3379,32 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1)
 
+  '@tanstack/devtools-event-client@0.4.4': {}
+
+  '@tanstack/form-core@1.33.3':
+    dependencies:
+      '@tanstack/devtools-event-client': 0.4.4
+      '@tanstack/pacer-lite': 0.1.1
+      '@tanstack/store': 0.11.0
+
   '@tanstack/history@1.162.0': {}
+
+  '@tanstack/pacer-lite@0.1.1': {}
+
+  '@tanstack/query-core@5.101.4': {}
+
+  '@tanstack/react-form@1.33.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@tanstack/form-core': 1.33.3
+      '@tanstack/react-store': 0.11.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react: 19.2.8
+    transitivePeerDependencies:
+      - react-dom
+
+  '@tanstack/react-query@5.101.4(react@19.2.8)':
+    dependencies:
+      '@tanstack/query-core': 5.101.4
+      react: 19.2.8
 
   '@tanstack/react-router@1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -3336,6 +3414,13 @@ snapshots:
       isbot: 5.2.1
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
+
+  '@tanstack/react-store@0.11.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@tanstack/store': 0.11.0
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      use-sync-external-store: 1.6.0(react@19.2.8)
 
   '@tanstack/react-store@0.9.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -3400,6 +3485,8 @@ snapshots:
       tinyglobby: 0.2.17
     transitivePeerDependencies:
       - supports-color
+
+  '@tanstack/store@0.11.0': {}
 
   '@tanstack/store@0.9.3': {}
 
