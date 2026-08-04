@@ -4,8 +4,10 @@
 		"types": ["vite/client"],
 		"paths": {
 			"@repo/frontend/*": ["./src/*"],
-			"@repo/ui/*": ["../../packages/ui/src/*"]
+			"@repo/ui/*": ["../../packages/ui/src/*"],
+			"@repo/auth/*": ["../auth/src/*"],
+			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"]
 		}
 	},
-	"include": ["src", "vite.config.ts"]
+	"include": ["src", "vite.config.ts", "../auth/worker-configuration.d.ts"]
 }

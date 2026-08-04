@@ -52,6 +52,8 @@ jobs:
 
       - name: Build frontend
         run: pnpm turbo run build --filter=@repo/frontend
+        env:
+          VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
 
       - name: Deploy frontend to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

@@ -8,6 +8,7 @@ import { refreshRoutes } from "@repo/auth/modules/refresh/refresh.routes"
 import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
 import type { Context } from "hono"
+import type { ApplyGlobalResponse } from "hono/client"
 import { cors } from "hono/cors"
 import { HTTPException } from "hono/http-exception"
 
@@ -45,3 +46,9 @@ const app = factory
 	.route("/", logoutRoutes)
 
 export default app
+export type AppWithErrors = ApplyGlobalResponse<
+	typeof app,
+	{
+		400: { json: { message: string; error: Record<string, unknown> } }
+	}
+>

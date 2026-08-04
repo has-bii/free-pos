@@ -71,7 +71,7 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 
 ```
 src/
-  index.ts                 # app entry: CORS + db middleware, all module routes mounted at root
+  index.ts                 # app entry: CORS + db middleware, all module routes mounted at root; exports AppWithErrors (RPC type)
   factory.ts                # createFactory<AppEnv>() — shared Bindings/Variables typing; exports AppEnv
   errors.ts                 # typed domain errors (e.g. EmailAlreadyExistsError)
   lib/                      # framework-agnostic helpers: password.ts, session.ts, request.ts
@@ -115,3 +115,4 @@ Plain object literals of async methods (`export const X = { ... }`) that are the
 - Handlers return **only** `c.json(...)`; there's no shared response envelope helper — the `{ message, data }` shape used in `register`/`login`/`me` handlers is convention, not enforced by a type, so match it when adding endpoints.
 - Repositories translate constraint violations into errors from `src/errors.ts` (see `UserRepository.insert`'s `ER_DUP_ENTRY` handling) — handlers catch these typed errors rather than inspecting driver error codes/messages themselves.
 - `login`/`register` currently pass `{ ipAddress: null, userAgent: null }` into `createSession` rather than `requestMeta(c)` from `src/lib/request.ts` — if you touch session creation, check whether wiring `requestMeta` in is in scope for that change.
+- `index.ts` exports `AppWithErrors`, a `typeof app` augmented via Hono's `ApplyGlobalResponse` with an explicit 400 shape (`{ message: string, error: Record<string, unknown> }`) — this is the type `apps/frontend` imports for its `hc()` RPC client (see `apps/frontend/CLAUDE.md`'s API client section), so it's a real consumer contract now, not just an internal type. `validate.ts`'s 400 body shape (`error[field] = { message: issue.message }`, first issue per field) is what that annotation describes — keep both in sync if either changes. Importing this type pulls this app's whole source tree into `apps/frontend`'s typecheck (see the root `CLAUDE.md`'s "Cross-runtime source-path imports" note) — a change here that's fine under this app's own tsconfig can still break `apps/frontend#typecheck`.

@@ -30,7 +30,10 @@ const derive = async (password: string, salt: Uint8Array, iterations: number): P
 		"deriveBits",
 	])
 	const bits = await crypto.subtle.deriveBits(
-		{ name: "PBKDF2", hash: "SHA-256", salt, iterations },
+		// Cast only needed because apps/frontend's tsconfig type-checks this file too (for the
+		// Hono RPC type it imports from @repo/auth) under DOM lib, where `salt`'s Uint8Array<ArrayBufferLike>
+		// doesn't satisfy DOM's stricter BufferSource — a non-issue under this app's own Workers-only tsconfig.
+		{ name: "PBKDF2", hash: "SHA-256", salt: salt as BufferSource, iterations },
 		keyMaterial,
 		KEY_BYTES * 8,
 	)

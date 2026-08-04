@@ -9,6 +9,7 @@ import { defineConfig } from "vite"
 // sync with tsconfig.json.
 const srcDir = `${import.meta.dirname}/src/`
 const uiSrcDir = `${import.meta.dirname}/../../packages/ui/src/`
+const authSrcDir = `${import.meta.dirname}/../auth/src/`
 
 export default defineConfig({
 	plugins: [
@@ -21,6 +22,7 @@ export default defineConfig({
 		alias: [
 			{ find: /^@repo\/frontend\//, replacement: srcDir },
 			{ find: /^@repo\/ui\//, replacement: uiSrcDir },
+			{ find: /^@repo\/auth\//, replacement: authSrcDir },
 		],
 	},
 })

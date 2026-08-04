@@ -1,6 +1,6 @@
 import * as v from "valibot"
 
-export const loginEmailSchema = v.object({
+export const loginSchema = v.object({
 	email: v.pipe(
 		v.string(),
 		v.trim(),
@@ -14,3 +14,5 @@ export const loginEmailSchema = v.object({
 		v.minLength(8, "Password must be at least 8 characters."),
 	),
 })
+
+export type LoginValues = v.InferOutput<typeof loginSchema>

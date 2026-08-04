@@ -8,7 +8,8 @@
 		},
 		"build": {
 			"dependsOn": ["^build", "typecheck"],
-			"outputs": ["dist/**"]
+			"outputs": ["dist/**"],
+			"env": ["VITE_AUTH_API_URL"]
 		},
 		"lint": {
 			"dependsOn": ["^typecheck"]
@@ -18,10 +19,6 @@
 		},
 		"test": {
 			"dependsOn": ["^typecheck"],
-			// Turbo runs tasks in strict env mode, so an undeclared var never
-			// reaches vitest. Without this, CI would silently fall through to an
-			// empty SERO_POS_DATABASE_URL binding and trip test/setup.ts's guard.
-			// It is also a cache key: pointing at a different database re-runs.
 			"env": ["TEST_DATABASE_URL"]
 		}
 	}

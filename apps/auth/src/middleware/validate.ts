@@ -8,11 +8,11 @@ export const validate = <T extends GenericSchema | GenericSchemaAsync, Target ex
 ) => {
 	return vValidator(target, schema, (result, c) => {
 		if (result.success) return
-		const error: Record<string, string> = {}
+		const error: Record<string, unknown> = {}
 		for (const issue of result.issues) {
 			const field = issue.path?.[0]?.key
 			if (typeof field === "string" && !(field in error)) {
-				error[field] = issue.message
+				error[field] = { message: issue.message }
 			}
 		}
 		return c.json({ message: "Validation failed.", error }, 400)

@@ -13,10 +13,13 @@
 		"test": "echo \"no tests\" && exit 0"
 	},
 	"dependencies": {
+		"@repo/auth": "workspace:*",
 		"@repo/ui": "workspace:*",
 		"@tanstack/react-form": "catalog:",
 		"@tanstack/react-query": "catalog:",
 		"@tanstack/react-router": "catalog:",
+		"hono": "catalog:",
+		"lucide-react": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"valibot": "catalog:"
