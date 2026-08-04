@@ -27,6 +27,10 @@ File-based: routes live under `src/routes/`, and the `@tanstack/router-plugin` V
 
 `src/routes/__root.tsx` is the root route (just an `<Outlet />` for now); `src/routes/index.tsx` is `/`.
 
+## React Compiler
+
+Enabled via `babel-plugin-react-compiler` + `@rolldown/plugin-babel`'s `reactCompilerPreset`, wired in `vite.config.ts` (`@vitejs/plugin-react` exposes `reactCompilerPreset`, but doesn't run it itself — it's an optional peer dep enabled by adding a separate `babel({ presets: [reactCompilerPreset()] })` plugin, since Vite 8 uses Rolldown and JSX/refresh are handled by `@vitejs/plugin-react`'s own oxc-based transform rather than Babel). No manual `useMemo`/`useCallback`/`React.memo` needed for components that follow the Rules of React — the compiler auto-memoizes. To confirm it's running on a given build, check for `_c(` (the compiler's memo-cache helper) in the built output.
+
 ## Styling / shared UI
 
 Tailwind v4, CSS-first config. There is no local Tailwind entry point or `tailwind.config.ts` in this app — `src/main.tsx` imports `@repo/ui/styles/globals.css` directly, so `packages/ui` is the single source of the theme (see `packages/ui/CLAUDE.md`). `components.json` here exists only so the shadcn CLI can add app-local, non-shared components under `src/components/`; anything meant to be reused should go in `packages/ui` instead, added via `pnpm dlx shadcn@latest add <component>` from `packages/ui/`, not from here.
