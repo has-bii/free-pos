@@ -126,7 +126,7 @@ describe("POST /refresh", () => {
 				type: "refresh",
 				exp: Math.floor(Date.now() / 1000) - 60,
 			},
-			env.SERO_POS_JWT_SECRET,
+			env.FREE_POS_JWT_SECRET,
 			"HS256",
 		)
 		await expectInvalidToken(await post(PATH, cookieHeader(REFRESH_TOKEN_COOKIE_NAME, expired)))

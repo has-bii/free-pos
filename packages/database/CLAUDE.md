@@ -19,7 +19,7 @@ pnpm db:migrate      # drizzle-kit migrate — applies pending migrations in dri
 
 `pnpm test` is currently a no-op placeholder (`echo "no tests" && exit 0`) — there's nothing to run here yet.
 
-Both `db:generate` and `db:migrate` (and `drizzle.config.ts`) read `DATABASE_URL` from `.env` (via `dotenv/config`), not from `SERO_POS_DATABASE_URL` — that's a separate env var used only by the running `apps/auth` Worker. Copy `.env.example` to `.env` and fill in a TiDB Cloud connection string (the `ssl` query param is mandatory; plain-text connections are rejected).
+Both `db:generate` and `db:migrate` (and `drizzle.config.ts`) read `DATABASE_URL` from `.env` (via `dotenv/config`), not from `FREE_POS_DATABASE_URL` — that's a separate env var used only by the running `apps/auth` Worker. Copy `.env.example` to `.env` and fill in a TiDB Cloud connection string (the `ssl` query param is mandatory; plain-text connections are rejected).
 
 ## Workflow for schema changes
 

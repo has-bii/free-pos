@@ -14,7 +14,7 @@ import { eq, inArray } from "drizzle-orm"
  * This is the one place outside `src/repositories/` that touches Drizzle
  * tables directly; that rule is about production code paths.
  */
-const db = createDatabaseClient(env.SERO_POS_DATABASE_URL)
+const db = createDatabaseClient(env.FREE_POS_DATABASE_URL)
 
 export const findUserByEmail = async (email: string) => {
 	const [row] = await db.select().from(user).where(eq(user.email, email))

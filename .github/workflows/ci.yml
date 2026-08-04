@@ -24,7 +24,7 @@ jobs:
 
       # Test runs never perform DDL, so the schema has to be brought forward
       # separately. Uses the same secret as the suite, via DATABASE_URL —
-      # drizzle-kit's own env var, not the Worker's SERO_POS_DATABASE_URL.
+      # drizzle-kit's own env var, not the Worker's FREE_POS_DATABASE_URL.
       - name: Apply migrations to the test database
         run: pnpm --filter @repo/database db:migrate
         env:

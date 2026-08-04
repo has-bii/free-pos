@@ -7,7 +7,7 @@ import { getCookie } from "hono/cookie"
 
 export const refreshHandlers = factory.createHandlers(async (c) => {
 	const db = c.var.db
-	const cookieDomain = c.env.SERO_POS_COOKIE_DOMAIN
+	const cookieDomain = c.env.FREE_POS_COOKIE_DOMAIN
 
 	// One message for every cause: the client's action is always the same,
 	// and distinguishing them would leak whether a session exists. A dead
@@ -21,10 +21,10 @@ export const refreshHandlers = factory.createHandlers(async (c) => {
 	const refreshToken = getCookie(c, REFRESH_TOKEN_COOKIE_NAME)
 	if (!refreshToken) return invalidToken()
 
-	const payload = await JWT.verifyRefreshToken(refreshToken, c.env.SERO_POS_JWT_SECRET)
+	const payload = await JWT.verifyRefreshToken(refreshToken, c.env.FREE_POS_JWT_SECRET)
 	if (!payload) return invalidToken()
 
-	const rotated = await Session.rotateSession(payload.sub, payload.sid, c.env.SERO_POS_JWT_SECRET)
+	const rotated = await Session.rotateSession(payload.sub, payload.sid, c.env.FREE_POS_JWT_SECRET)
 
 	// The `userId` predicate is the `sub === session.user_id` invariant
 	// folded into the CAS, so it costs no extra query.

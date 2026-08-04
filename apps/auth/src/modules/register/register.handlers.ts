@@ -50,13 +50,13 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 		throw err
 	}
 
-	const { session, accessToken, refreshToken } = await Session.createSession(userId, c.env.SERO_POS_JWT_SECRET, {
+	const { session, accessToken, refreshToken } = await Session.createSession(userId, c.env.FREE_POS_JWT_SECRET, {
 		ipAddress: null,
 		userAgent: null,
 	})
 	await SessionRepository.insert(db, session)
 
-	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.SERO_POS_COOKIE_DOMAIN })
+	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.FREE_POS_COOKIE_DOMAIN })
 
 	return c.json(
 		{

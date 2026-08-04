@@ -2,8 +2,8 @@ import { JWT } from "@repo/auth-kit/jwt"
 import type { Context } from "hono"
 import { deleteCookie, setCookie } from "hono/cookie"
 
-export const ACCESS_TOKEN_COOKIE_NAME = "sero_pos_access_token"
-export const REFRESH_TOKEN_COOKIE_NAME = "sero_pos_refresh_token"
+export const ACCESS_TOKEN_COOKIE_NAME = "free_pos_access_token"
+export const REFRESH_TOKEN_COOKIE_NAME = "free_pos_refresh_token"
 
 // The refresh cookie is deliberately scoped to this single path — it must
 // never be sent to any other route, on any service, regardless of

@@ -16,7 +16,7 @@ const buildApp = () => {
 		return c.json({ ok: true })
 	})
 	app.get("/set-with-domain", (c) => {
-		setAuthCookies(c, TOKENS, { cookieDomain: ".sero-pos.com" })
+		setAuthCookies(c, TOKENS, { cookieDomain: ".yourdomain.com" })
 		return c.json({ ok: true })
 	})
 	app.get("/clear", (c) => {
@@ -24,7 +24,7 @@ const buildApp = () => {
 		return c.json({ ok: true })
 	})
 	app.get("/clear-with-domain", (c) => {
-		clearAuthCookies(c, { cookieDomain: ".sero-pos.com" })
+		clearAuthCookies(c, { cookieDomain: ".yourdomain.com" })
 		return c.json({ ok: true })
 	})
 	return app
@@ -58,7 +58,7 @@ describe("setAuthCookies", () => {
 		const cookies = res.headers.getSetCookie()
 
 		const access = findCookie(cookies, ACCESS_TOKEN_COOKIE_NAME)
-		expect(access).toContain("Domain=.sero-pos.com")
+		expect(access).toContain("Domain=.yourdomain.com")
 
 		const refresh = findCookie(cookies, REFRESH_TOKEN_COOKIE_NAME)
 		expect(refresh).not.toEqual(expect.arrayContaining([expect.stringMatching(/^Domain=/)]))
@@ -83,6 +83,6 @@ describe("clearAuthCookies", () => {
 		const cookies = res.headers.getSetCookie()
 
 		const access = findCookie(cookies, ACCESS_TOKEN_COOKIE_NAME)
-		expect(access).toContain("Domain=.sero-pos.com")
+		expect(access).toContain("Domain=.yourdomain.com")
 	})
 })

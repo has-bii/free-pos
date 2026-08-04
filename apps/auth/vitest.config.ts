@@ -26,12 +26,12 @@ export default defineConfig({
 				bindings: {
 					// Hardcoded on purpose: test/routes/me.test.ts hand-signs an expired
 					// token, which requires knowing the signing key.
-					SERO_POS_JWT_SECRET: "test-jwt-secret-do-not-use-in-production",
-					SERO_POS_DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
-					SERO_POS_FRONTEND_ORIGIN: "https://app.test.invalid",
+					FREE_POS_JWT_SECRET: "test-jwt-secret-do-not-use-in-production",
+					FREE_POS_DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+					FREE_POS_FRONTEND_ORIGIN: "https://app.test.invalid",
 					// Empty, like local dev: exercises the host-only cookie path rather
-					// than pinning assertions to the prod `.sero-pos.com` value.
-					SERO_POS_COOKIE_DOMAIN: "",
+					// than pinning assertions to the prod `.yourdomain.com` value.
+					FREE_POS_COOKIE_DOMAIN: "",
 				},
 			},
 		}),

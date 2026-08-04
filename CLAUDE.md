@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Contains a Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests). It also contains `apps/frontend`, a client-side SPA (Vite + React + TanStack Router, no server component) that consumes the shared shadcn/ui component library in `packages/ui`, deployed as a static-assets-only Cloudflare Worker. `apps/frontend` calls `apps/auth` over Hono's typed RPC client (`hc`) — see `apps/frontend/CLAUDE.md`'s API client section.
+Free POS (`free-pos`): a Turborepo/pnpm monorepo. Contains a Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests). It also contains `apps/frontend`, a client-side SPA (Vite + React + TanStack Router, no server component) that consumes the shared shadcn/ui component library in `packages/ui`, deployed as a static-assets-only Cloudflare Worker. `apps/frontend` calls `apps/auth` over Hono's typed RPC client (`hc`) — see `apps/frontend/CLAUDE.md`'s API client section.
 
 ## Commands
 

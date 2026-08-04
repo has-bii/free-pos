@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "sero-pos-auth",
+	"name": "free-pos-auth",
 	"main": "src/index.ts",
 	"minify": true,
 	"compatibility_date": "2026-08-02",
@@ -8,8 +8,8 @@
 	"observability": {
 		"enabled": true
 	},
-	// All four bindings (SERO_POS_DATABASE_URL, SERO_POS_JWT_SECRET, SERO_POS_FRONTEND_ORIGIN,
-	// SERO_POS_COOKIE_DOMAIN) are real secrets configured out-of-band via `wrangler secret put`
+	// All four bindings (FREE_POS_DATABASE_URL, FREE_POS_JWT_SECRET, FREE_POS_FRONTEND_ORIGIN,
+	// FREE_POS_COOKIE_DOMAIN) are real secrets configured out-of-band via `wrangler secret put`
 	// and never appear in this file. `.dev.vars` supplies all four for local dev — see
 	// .dev.vars.example.
 	"dev": {

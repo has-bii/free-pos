@@ -19,7 +19,7 @@ const app = factory
 			// A function rather than the literal string: `credentials: true`
 			// forbids a wildcard origin, and the allowed origin is per-request env,
 			// not known when this middleware is constructed.
-			origin: (origin, c: Context<AppEnv>) => (origin === c.env.SERO_POS_FRONTEND_ORIGIN ? origin : undefined),
+			origin: (origin, c: Context<AppEnv>) => (origin === c.env.FREE_POS_FRONTEND_ORIGIN ? origin : undefined),
 			credentials: true,
 		}),
 	)

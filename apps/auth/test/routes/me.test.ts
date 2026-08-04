@@ -78,7 +78,7 @@ describe("GET /me", () => {
 	it("rejects a refresh token used as an access token", async () => {
 		const refreshToken = await JWT.signRefreshToken(
 			{ sub: fixture.user.id, sid: fixture.user.id, jti: "irrelevant" },
-			env.SERO_POS_JWT_SECRET,
+			env.FREE_POS_JWT_SECRET,
 		)
 		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, refreshToken)))
 	})
@@ -92,7 +92,7 @@ describe("GET /me", () => {
 				type: "access",
 				exp: Math.floor(Date.now() / 1000) - 60,
 			},
-			env.SERO_POS_JWT_SECRET,
+			env.FREE_POS_JWT_SECRET,
 			"HS256",
 		)
 		await expectUnauthorized(await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, expired)))

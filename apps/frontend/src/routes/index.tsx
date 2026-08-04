@@ -11,7 +11,7 @@ function HomeComponent() {
 		<div className="flex min-h-svh items-center justify-center p-6">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
-					<CardTitle>Sero POS</CardTitle>
+					<CardTitle>Free POS</CardTitle>
 					<CardDescription>Frontend scaffold is wired up.</CardDescription>
 				</CardHeader>
 				<CardContent>
