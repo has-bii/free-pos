@@ -6,6 +6,10 @@
 			"persistent": true,
 			"dependsOn": ["^typecheck"]
 		},
+		"build": {
+			"dependsOn": ["^build", "typecheck"],
+			"outputs": ["dist/**"]
+		},
 		"lint": {
 			"dependsOn": ["^typecheck"]
 		},

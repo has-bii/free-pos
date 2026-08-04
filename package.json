@@ -12,6 +12,7 @@
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
 		"format": "biome format --write .",
+		"ui:add": "pnpm dlx shadcn@latest add --cwd packages/ui",
 		"prepare": "lefthook install"
 	},
 	"devDependencies": {

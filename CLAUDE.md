@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Currently contains a single Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests).
+Sero POS (`sero-pos`): a Turborepo/pnpm monorepo. Contains a Cloudflare Workers service, `apps/auth`, backed by a shared `packages/database` package (Drizzle ORM over TiDB Serverless) and a shared `packages/auth-kit` package (JWT signing/verification, the `requireAuth` middleware, and auth cookie helpers — for `apps/auth` and any future service that needs to authenticate requests). It also contains `apps/frontend`, a client-side SPA (Vite + React + TanStack Router, no server component) that consumes the shared shadcn/ui component library in `packages/ui`; `apps/frontend` is not yet wired to `apps/auth` or deployed anywhere.
 
 ## Commands
 
@@ -18,6 +18,7 @@ pnpm lint               # turbo run lint (biome check . per package)
 pnpm typecheck          # turbo run typecheck (tsc --noEmit per package)
 pnpm test               # turbo run test (vitest run per package; apps/auth needs a test DB — see apps/auth/CLAUDE.md)
 pnpm format             # biome format --write . (whole repo)
+pnpm ui:add <component> # add a shadcn/ui component to packages/ui, e.g. pnpm ui:add badge — see packages/ui/CLAUDE.md
 ```
 
 To scope any of the above to one package, use turbo's filter flag, e.g. `pnpm turbo run test --filter=@repo/auth`, or `cd` into the package and run its scripts directly (`pnpm --filter @repo/auth dev`, etc.).
@@ -34,15 +35,17 @@ Each app/package's own `CLAUDE.md` documents its package-specific scripts (e.g. 
 
 ## Workspace/versioning conventions
 
-- Internal packages are referenced as `@repo/<name>` via `workspace:*` in `package.json` and consumed with subpath imports mapped through each package's `tsconfig.json` `paths` (e.g. `@repo/auth/factory` → `apps/auth/src/factory.ts`, a package importing its own modules). The same mapping style is used for cross-package imports too — e.g. `apps/auth`'s `tsconfig.json` maps `@repo/auth-kit/*` to `../../packages/auth-kit/src/*` so it can import `@repo/auth-kit/jwt`, `@repo/auth-kit/cookies`, etc. Since wrangler's bundler reads tsconfig `paths` but Vite does not, any package with a Vite-based `vitest.config.ts` must mirror the same mapping as a `resolve.alias` — see the comment in `apps/auth/vitest.config.ts`. When adding a new internal module, you generally don't need a barrel/index re-export — import the concrete path directly.
+- Internal packages are referenced as `@repo/<name>` via `workspace:*` in `package.json` and consumed with subpath imports mapped through each package's `tsconfig.json` `paths` (e.g. `@repo/auth/factory` → `apps/auth/src/factory.ts`, a package importing its own modules). The same mapping style is used for cross-package imports too — e.g. `apps/auth`'s `tsconfig.json` maps `@repo/auth-kit/*` to `../../packages/auth-kit/src/*` so it can import `@repo/auth-kit/jwt`, `@repo/auth-kit/cookies`, etc. Since wrangler's bundler reads tsconfig `paths` but Vite does not, any package with a Vite-based config (`vitest.config.ts`, or `apps/frontend/vite.config.ts`) must mirror the same mapping as a `resolve.alias` — see the comment in `apps/auth/vitest.config.ts` or `apps/frontend/vite.config.ts`. When adding a new internal module, you generally don't need a barrel/index re-export — import the concrete path directly.
 - Shared third-party dependency versions are pinned once in `pnpm-workspace.yaml` under `catalog:` and referenced from each package.json as `"catalog:"`. Add new shared deps there rather than hardcoding a version in a package.
-- `packages/typescript-config` is the single source of `tsconfig` compiler options (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ESNext/bundler resolution); every package's `tsconfig.json` just extends `@repo/typescript-config/base.json` and adds its own `paths`.
+- `packages/typescript-config` is the single source of `tsconfig` compiler options (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ESNext/bundler resolution); every package's `tsconfig.json` extends either `@repo/typescript-config/base.json` (Workers/Node) or `@repo/typescript-config/react-library.json` (browser/React — adds `jsx`/DOM libs on top of `base.json`) and adds its own `paths`.
 
 ## Architecture
 
 ### Adding a new app
 
-Follow the `apps/auth` shape: a Hono app built via a shared `factory.ts` (`createFactory<AppEnv>()` from `hono/factory`) so route modules, middleware, and handlers all share one typed `Bindings`/`Variables` env instead of redeclaring generics everywhere. Bindings (`CloudflareBindings`) come from `worker-configuration.d.ts` (generated by wrangler — see `apps/auth/wrangler.jsonc`); `Variables` holds per-request state set by middleware (e.g. `db`, `userId`).
+For a new Cloudflare Workers service, follow the `apps/auth` shape: a Hono app built via a shared `factory.ts` (`createFactory<AppEnv>()` from `hono/factory`) so route modules, middleware, and handlers all share one typed `Bindings`/`Variables` env instead of redeclaring generics everywhere. Bindings (`CloudflareBindings`) come from `worker-configuration.d.ts` (generated by wrangler — see `apps/auth/wrangler.jsonc`); `Variables` holds per-request state set by middleware (e.g. `db`, `userId`).
+
+For a new browser app, follow the `apps/frontend` shape instead: Vite + React, `tsconfig.json` extending `@repo/typescript-config/react-library.json`, and any shared/reusable UI added to `packages/ui` rather than duplicated per app.
 
 See each app/package's own `CLAUDE.md` for its module layout, repository pattern, and other implementation details.
 

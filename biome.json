@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/worker-configuration.d.ts"]
+		"includes": ["**", "!**/worker-configuration.d.ts", "!**/routeTree.gen.ts"]
 	},
 	"formatter": {
 		"enabled": true
@@ -24,6 +24,11 @@
 			"semicolons": "asNeeded",
 			"bracketSpacing": true,
 			"lineWidth": 120
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	},
 	"assist": {
