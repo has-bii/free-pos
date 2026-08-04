@@ -1,5 +1,5 @@
 import { factory } from "@repo/auth/factory"
-import { verifyPassword } from "@repo/auth/lib/password"
+import { Password } from "@repo/auth/lib/password"
 import { Session } from "@repo/auth/lib/session"
 import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
@@ -19,7 +19,7 @@ export const loginEmailHandlers = factory.createHandlers(validate("json", loginE
 	const credentialAccount = await AccountRepository.findCredentialByUserId(db, foundUser.id)
 	if (!credentialAccount?.password) return invalidCredentials()
 
-	const passwordValid = await verifyPassword(password, credentialAccount.password)
+	const passwordValid = await Password.verifyPassword(password, credentialAccount.password)
 	if (!passwordValid) return invalidCredentials()
 
 	const { session, accessToken, refreshToken, expiresIn } = await Session.createSession(

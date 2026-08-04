@@ -39,13 +39,13 @@ const derive = async (password: string, salt: Uint8Array, iterations: number): P
 
 // Iteration count is capped by the Workers Free tier's 10ms CPU budget — see
 // docs/prd/user-registration.md#43-password-hashing for the benchmark and trade-off.
-export const hashPassword = async (password: string): Promise<string> => {
+const hashPassword = async (password: string): Promise<string> => {
 	const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES))
 	const hash = await derive(password, salt, ITERATIONS)
 	return `${ALGORITHM}$${ITERATIONS}$${toBase64(salt)}$${toBase64(hash)}`
 }
 
-export const verifyPassword = async (password: string, stored: string): Promise<boolean> => {
+const verifyPassword = async (password: string, stored: string): Promise<boolean> => {
 	const parts = stored.split("$")
 	if (parts.length !== 4) return false
 	const [algorithm, iterationsStr, saltBase64, hashBase64] = parts
@@ -65,4 +65,9 @@ export const verifyPassword = async (password: string, stored: string): Promise<
 
 	const derivedHash = await derive(password, salt, iterations)
 	return timingSafeEqual(derivedHash, expectedHash)
+}
+
+export const Password = {
+	hashPassword,
+	verifyPassword,
 }

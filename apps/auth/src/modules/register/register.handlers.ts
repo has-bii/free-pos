@@ -1,6 +1,6 @@
 import { EmailAlreadyExistsError } from "@repo/auth/errors"
 import { factory } from "@repo/auth/factory"
-import { hashPassword } from "@repo/auth/lib/password"
+import { Password } from "@repo/auth/lib/password"
 import { Session } from "@repo/auth/lib/session"
 import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
@@ -30,7 +30,7 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 		createdAt: now,
 		updatedAt: now,
 	}
-	const passwordHash = await hashPassword(password)
+	const passwordHash = await Password.hashPassword(password)
 
 	try {
 		await db.transaction(async (tx) => {

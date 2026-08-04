@@ -1,9 +1,6 @@
 import { uuidv7 } from "uuidv7"
 import { JWT } from "./jwt"
 
-// Matches REFRESH_TOKEN_TTL_SECONDS in jwt.ts — the two must stay equal.
-const SESSION_TTL_SECONDS = 2_592_000
-
 type IssuedTokens = {
 	accessToken: string
 	refreshToken: string
@@ -45,7 +42,7 @@ const createSession = async (
 			id: sessionId,
 			userId,
 			token: tokenValue,
-			expiresAt: new Date(Date.now() + SESSION_TTL_SECONDS * 1000),
+			expiresAt: new Date(Date.now() + JWT.REFRESH_TOKEN_TTL_SECONDS * 1000),
 			ipAddress: meta.ipAddress,
 			userAgent: meta.userAgent,
 		},
@@ -64,7 +61,7 @@ const rotateSession = async (
 	return {
 		token: tokenValue,
 		// Sliding expiry (decision 7): every redemption extends the session.
-		expiresAt: new Date(Date.now() + SESSION_TTL_SECONDS * 1000),
+		expiresAt: new Date(Date.now() + JWT.REFRESH_TOKEN_TTL_SECONDS * 1000),
 		...tokens,
 	}
 }
