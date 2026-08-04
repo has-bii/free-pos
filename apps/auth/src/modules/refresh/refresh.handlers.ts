@@ -9,9 +9,8 @@ export const refreshHandlers = factory.createHandlers(validate("json", refreshSc
 	const { refreshToken } = c.req.valid("json")
 	const db = c.var.db
 
-	// One message for every cause (decision 8): the client's action is
-	// always the same, and distinguishing them would leak whether a
-	// session exists.
+	// One message for every cause: the client's action is always the same,
+	// and distinguishing them would leak whether a session exists.
 	const invalidToken = () => c.json({ message: "Invalid or expired refresh token." }, 401)
 
 	const payload = await JWT.verifyRefreshToken(refreshToken, c.env.SERO_POS_JWT_SECRET)
@@ -27,7 +26,7 @@ export const refreshHandlers = factory.createHandlers(validate("json", refreshSc
 	const rotated = await Session.rotateSession(payload.sub, sid, c.env.SERO_POS_JWT_SECRET)
 
 	// The `userId` predicate is the `sub === session.user_id` invariant
-	// (decision 8) folded into the CAS, so it costs no extra query.
+	// folded into the CAS, so it costs no extra query.
 	const swapped = await SessionRepository.rotateToken(db, {
 		currentToken: jti,
 		userId: payload.sub,

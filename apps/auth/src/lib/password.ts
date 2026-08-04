@@ -37,8 +37,7 @@ const derive = async (password: string, salt: Uint8Array, iterations: number): P
 	return new Uint8Array(bits)
 }
 
-// Iteration count is capped by the Workers Free tier's 10ms CPU budget — see
-// docs/prd/user-registration.md#43-password-hashing for the benchmark and trade-off.
+// Iteration count is capped by the Workers Free tier's 10ms CPU budget.
 const hashPassword = async (password: string): Promise<string> => {
 	const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES))
 	const hash = await derive(password, salt, ITERATIONS)

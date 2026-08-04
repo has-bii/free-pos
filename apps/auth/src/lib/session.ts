@@ -60,7 +60,7 @@ const rotateSession = async (
 
 	return {
 		token: tokenValue,
-		// Sliding expiry (decision 7): every redemption extends the session.
+		// Sliding expiry: every redemption extends the session.
 		expiresAt: new Date(Date.now() + JWT.REFRESH_TOKEN_TTL_SECONDS * 1000),
 		...tokens,
 	}

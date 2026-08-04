@@ -17,7 +17,7 @@ export const SessionRepository = {
 	/**
 	 * Compare-and-swap. Returns false for every failure — token unknown,
 	 * already rotated, wrong user, session expired — because the caller
-	 * collapses them all into one 401 anyway (decision 8).
+	 * collapses them all into one 401 anyway.
 	 *
 	 * This depends on the UPDATE always *changing* the row: MySQL's
 	 * affectedRows counts changed rows, not matched ones. `nextToken` is a
