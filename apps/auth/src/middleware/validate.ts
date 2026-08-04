@@ -2,10 +2,7 @@ import { vValidator } from "@hono/valibot-validator"
 import type { ValidationTargets } from "hono"
 import type { GenericSchema, GenericSchemaAsync } from "valibot"
 
-export const validate = <
-	T extends GenericSchema | GenericSchemaAsync,
-	Target extends keyof ValidationTargets,
->(
+export const validate = <T extends GenericSchema | GenericSchemaAsync, Target extends keyof ValidationTargets>(
 	target: Target,
 	schema: T,
 ) => {

@@ -9,8 +9,5 @@ export const registerEmailSchema = v.object({
 		v.nonEmpty("Email is required."),
 		v.email("Enter a valid email address."),
 	),
-	password: v.pipe(
-		v.string(),
-		v.minLength(8, "Password must be at least 8 characters."),
-	),
+	password: v.pipe(v.string(), v.minLength(8, "Password must be at least 8 characters.")),
 })

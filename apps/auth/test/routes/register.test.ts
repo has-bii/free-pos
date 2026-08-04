@@ -1,10 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest"
-import {
-	deleteTestUsersByEmail,
-	findAccountsByUserId,
-	findSessionsByUserId,
-	findUserByEmail,
-} from "../helpers/db"
+import { deleteTestUsersByEmail, findAccountsByUserId, findSessionsByUserId, findUserByEmail } from "../helpers/db"
 import {
 	type AuthSuccessBody,
 	DEFAULT_PASSWORD,
@@ -156,11 +151,7 @@ describe("POST /auth/register/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(Object.keys(body.error).sort()).toEqual([
-			"email",
-			"name",
-			"password",
-		])
+		expect(Object.keys(body.error).sort()).toEqual(["email", "name", "password"])
 	})
 
 	// Case 8b
@@ -180,8 +171,6 @@ describe("POST /auth/register/email", () => {
 
 		const res = await postJson(PATH, validBody(email))
 		expect(res.status).toBe(409)
-		expect((await readJson<MessageBody>(res)).message).toBe(
-			"Email already registered.",
-		)
+		expect((await readJson<MessageBody>(res)).message).toBe("Email already registered.")
 	})
 })

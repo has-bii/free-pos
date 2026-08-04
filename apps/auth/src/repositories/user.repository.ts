@@ -9,29 +9,18 @@ const isDuplicateEntryError = (err: unknown): boolean => {
 	return /duplicate entry/i.test(err.message)
 }
 
-export abstract class UserRepository {
-	static async findByEmail(db: DatabaseExecutor, email: string) {
-		const [foundUser] = await db
-			.select()
-			.from(user)
-			.where(eq(user.email, email))
-			.limit(1)
+export const UserRepository = {
+	findByEmail: async (db: DatabaseExecutor, email: string) => {
+		const [foundUser] = await db.select().from(user).where(eq(user.email, email)).limit(1)
 		return foundUser ?? null
-	}
+	},
 
-	static async findById(db: DatabaseExecutor, id: string) {
-		const [foundUser] = await db
-			.select()
-			.from(user)
-			.where(eq(user.id, id))
-			.limit(1)
+	findById: async (db: DatabaseExecutor, id: string) => {
+		const [foundUser] = await db.select().from(user).where(eq(user.id, id)).limit(1)
 		return foundUser ?? null
-	}
+	},
 
-	static async insert(
-		db: DatabaseExecutor,
-		newUser: typeof user.$inferInsert,
-	): Promise<void> {
+	insert: async (db: DatabaseExecutor, newUser: typeof user.$inferInsert) => {
 		try {
 			await db.insert(user).values(newUser)
 		} catch (err) {
@@ -40,5 +29,5 @@ export abstract class UserRepository {
 			}
 			throw err
 		}
-	}
+	},
 }

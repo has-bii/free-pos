@@ -2,15 +2,7 @@ import { env } from "cloudflare:workers"
 import jwt from "@tsndr/cloudflare-worker-jwt"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { deleteTestUsersByEmail } from "../helpers/db"
-import {
-	bearer,
-	get,
-	type MeSuccessBody,
-	type MessageBody,
-	readJson,
-	registerUser,
-	uniqueEmail,
-} from "../helpers/http"
+import { bearer, get, type MeSuccessBody, type MessageBody, readJson, registerUser, uniqueEmail } from "../helpers/http"
 
 const createdEmails: string[] = []
 const track = (email: string) => {
@@ -77,20 +69,14 @@ describe("GET /auth/me", () => {
 
 	// Case 22b — well-formed but signed with the wrong key.
 	it("rejects a token with a bad signature", async () => {
-		const forged = await jwt.sign(
-			{ sub: fixture.user.id, type: "access" },
-			"not-the-real-signing-secret",
-			"HS256",
-		)
+		const forged = await jwt.sign({ sub: fixture.user.id, type: "access" }, "not-the-real-signing-secret", "HS256")
 		await expectUnauthorized(await get(PATH, bearer(forged)))
 	})
 
 	// Case 23 — refresh tokens live 30 days against the access token's 15
 	// minutes, so accepting one here would be a real privilege escalation.
 	it("rejects a refresh token used as a bearer token", async () => {
-		await expectUnauthorized(
-			await get(PATH, bearer(fixture.token.refreshToken)),
-		)
+		await expectUnauthorized(await get(PATH, bearer(fixture.token.refreshToken)))
 	})
 
 	// Case 24 — the secret comes from the binding rather than a second copy of

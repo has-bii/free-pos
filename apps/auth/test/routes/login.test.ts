@@ -73,9 +73,7 @@ describe("POST /auth/login/email", () => {
 			password: `${fixture.password}-wrong`,
 		})
 		expect(res.status).toBe(401)
-		expect((await readJson<MessageBody>(res)).message).toBe(
-			"Invalid email or password.",
-		)
+		expect((await readJson<MessageBody>(res)).message).toBe("Invalid email or password.")
 	})
 
 	// Case 13 — identical message to case 12, so the endpoint does not leak
@@ -86,9 +84,7 @@ describe("POST /auth/login/email", () => {
 			password: DEFAULT_PASSWORD,
 		})
 		expect(res.status).toBe(401)
-		expect((await readJson<MessageBody>(res)).message).toBe(
-			"Invalid email or password.",
-		)
+		expect((await readJson<MessageBody>(res)).message).toBe("Invalid email or password.")
 	})
 
 	// Case 14

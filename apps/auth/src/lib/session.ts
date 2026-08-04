@@ -1,9 +1,5 @@
 import { uuidv7 } from "uuidv7"
-import {
-	ACCESS_TOKEN_TTL_SECONDS,
-	signAccessToken,
-	signRefreshToken,
-} from "./jwt"
+import { JWT } from "./jwt"
 
 // Matches REFRESH_TOKEN_TTL_SECONDS in jwt.ts — the two must stay equal.
 const SESSION_TTL_SECONDS = 2_592_000
@@ -26,13 +22,13 @@ const issueTokens = async (
 	secret: string,
 ): Promise<IssuedTokens> => {
 	const [accessToken, refreshToken] = await Promise.all([
-		signAccessToken({ sub: userId, sid: sessionId }, secret),
-		signRefreshToken({ sub: userId, sid: sessionId, jti: tokenValue }, secret),
+		JWT.signAccessToken({ sub: userId, sid: sessionId }, secret),
+		JWT.signRefreshToken({ sub: userId, sid: sessionId, jti: tokenValue }, secret),
 	])
-	return { accessToken, refreshToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS }
+	return { accessToken, refreshToken, expiresIn: JWT.ACCESS_TOKEN_TTL_SECONDS }
 }
 
-export const createSession = async (
+const createSession = async (
 	userId: string,
 	secret: string,
 	meta: { ipAddress: string | null; userAgent: string | null },
@@ -57,7 +53,7 @@ export const createSession = async (
 	}
 }
 
-export const rotateSession = async (
+const rotateSession = async (
 	userId: string,
 	sessionId: string,
 	secret: string,
@@ -71,4 +67,9 @@ export const rotateSession = async (
 		expiresAt: new Date(Date.now() + SESSION_TTL_SECONDS * 1000),
 		...tokens,
 	}
+}
+
+export const Session = {
+	createSession,
+	rotateSession,
 }

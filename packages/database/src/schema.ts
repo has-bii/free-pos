@@ -1,10 +1,4 @@
-import {
-	boolean,
-	mysqlTable,
-	text,
-	timestamp,
-	varchar,
-} from "drizzle-orm/mysql-core"
+import { boolean, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core"
 import { uuidv7 } from "uuidv7"
 
 export const user = mysqlTable("user", {

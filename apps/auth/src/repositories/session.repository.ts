@@ -2,13 +2,17 @@ import type { DatabaseExecutor } from "@repo/auth/factory"
 import { session } from "@repo/database"
 import { and, eq, gt } from "drizzle-orm"
 
-export abstract class SessionRepository {
-	static async insert(
-		db: DatabaseExecutor,
-		newSession: typeof session.$inferInsert,
-	): Promise<void> {
+type RotateTokenParams = {
+	currentToken: string
+	userId: string
+	nextToken: string
+	expiresAt: Date
+}
+
+export const SessionRepository = {
+	insert: async (db: DatabaseExecutor, newSession: typeof session.$inferInsert) => {
 		await db.insert(session).values(newSession)
-	}
+	},
 
 	/**
 	 * Compare-and-swap. Returns false for every failure — token unknown,
@@ -21,15 +25,7 @@ export abstract class SessionRepository {
 	 * exactly 1. If either write is ever made conditional or idempotent, this
 	 * check silently starts rejecting valid tokens.
 	 */
-	static async rotateToken(
-		db: DatabaseExecutor,
-		params: {
-			currentToken: string
-			userId: string
-			nextToken: string
-			expiresAt: Date
-		},
-	): Promise<boolean> {
+	rotateToken: async (db: DatabaseExecutor, params: RotateTokenParams): Promise<boolean> => {
 		const result = await db
 			.update(session)
 			.set({ token: params.nextToken, expiresAt: params.expiresAt })
@@ -43,5 +39,5 @@ export abstract class SessionRepository {
 
 		// `rowsAffected` is `number | null` on @tidbcloud/serverless; null fails closed.
 		return result.rowsAffected === 1
-	}
+	},
 }

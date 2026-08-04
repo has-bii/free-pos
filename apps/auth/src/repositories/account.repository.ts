@@ -2,22 +2,16 @@ import type { DatabaseExecutor } from "@repo/auth/factory"
 import { account } from "@repo/database"
 import { and, eq } from "drizzle-orm"
 
-export abstract class AccountRepository {
-	static async findCredentialByUserId(db: DatabaseExecutor, userId: string) {
+export const AccountRepository = {
+	findCredentialByUserId: async (db: DatabaseExecutor, userId: string) => {
 		const [credentialAccount] = await db
 			.select()
 			.from(account)
-			.where(
-				and(eq(account.userId, userId), eq(account.providerId, "credential")),
-			)
+			.where(and(eq(account.userId, userId), eq(account.providerId, "credential")))
 			.limit(1)
 		return credentialAccount ?? null
-	}
-
-	static async insert(
-		db: DatabaseExecutor,
-		payload: typeof account.$inferInsert,
-	): Promise<void> {
+	},
+	insert: async (db: DatabaseExecutor, payload: typeof account.$inferInsert) => {
 		await db.insert(account).values(payload)
-	}
+	},
 }

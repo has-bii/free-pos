@@ -80,18 +80,14 @@ export const bearer = (token: string) => ({ Authorization: `Bearer ${token}` })
  * Seeds a user through the real register endpoint (never through the teardown
  * DB client), so fixtures match production writes exactly.
  */
-export const registerUser = async (
-	overrides: { name?: string; email?: string; password?: string } = {},
-) => {
+export const registerUser = async (overrides: { name?: string; email?: string; password?: string } = {}) => {
 	const name = overrides.name ?? "Test User"
 	const email = overrides.email ?? uniqueEmail()
 	const password = overrides.password ?? DEFAULT_PASSWORD
 
 	const res = await postJson("/auth/register/email", { name, email, password })
 	if (res.status !== 201) {
-		throw new Error(
-			`Fixture registration failed: ${res.status} ${await res.text()}`,
-		)
+		throw new Error(`Fixture registration failed: ${res.status} ${await res.text()}`)
 	}
 
 	const body = await readJson<AuthSuccessBody>(res)

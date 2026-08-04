@@ -47,9 +47,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const expectInvalidToken = async (res: Response) => {
 	expect(res.status).toBe(401)
-	expect((await readJson<MessageBody>(res)).message).toBe(
-		"Invalid or expired refresh token.",
-	)
+	expect((await readJson<MessageBody>(res)).message).toBe("Invalid or expired refresh token.")
 }
 
 describe("POST /auth/refresh", () => {
@@ -108,16 +106,12 @@ describe("POST /auth/refresh", () => {
 
 		expect(afterRow.id).toBe(beforeRow.id)
 		expect(afterRow.token).not.toBe(beforeRow.token)
-		expect(afterRow.expiresAt.getTime()).toBeGreaterThan(
-			beforeRow.expiresAt.getTime(),
-		)
+		expect(afterRow.expiresAt.getTime()).toBeGreaterThan(beforeRow.expiresAt.getTime())
 	})
 
 	// Case 32
 	it("rejects a garbage string", async () => {
-		await expectInvalidToken(
-			await postJson(PATH, { refreshToken: "not-a-real-token" }),
-		)
+		await expectInvalidToken(await postJson(PATH, { refreshToken: "not-a-real-token" }))
 	})
 
 	// Case 33
@@ -138,9 +132,7 @@ describe("POST /auth/refresh", () => {
 
 	// Case 34
 	it("rejects an access token used as a refresh token", async () => {
-		await expectInvalidToken(
-			await postJson(PATH, { refreshToken: fixture.token.accessToken }),
-		)
+		await expectInvalidToken(await postJson(PATH, { refreshToken: fixture.token.accessToken }))
 	})
 
 	// Case 35
@@ -164,9 +156,7 @@ describe("POST /auth/refresh", () => {
 		const deleted = await registerUser({ email: track(uniqueEmail()) })
 		await deleteTestUsersByEmail([deleted.email])
 
-		await expectInvalidToken(
-			await postJson(PATH, { refreshToken: deleted.token.refreshToken }),
-		)
+		await expectInvalidToken(await postJson(PATH, { refreshToken: deleted.token.refreshToken }))
 	})
 
 	// Case 37

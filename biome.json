@@ -15,17 +15,15 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended",
-			"complexity": {
-				"noStaticOnlyClass": "off"
-			}
+			"preset": "recommended"
 		}
 	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double",
 			"semicolons": "asNeeded",
-			"bracketSpacing": true
+			"bracketSpacing": true,
+			"lineWidth": 120
 		}
 	},
 	"assist": {

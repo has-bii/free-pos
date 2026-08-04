@@ -1,5 +1,5 @@
 import { factory } from "@repo/auth/factory"
-import { verifyAccessToken } from "@repo/auth/lib/jwt"
+import { JWT } from "@repo/auth/lib/jwt"
 
 export const requireAuth = factory.createMiddleware(async (c, next) => {
 	const unauthorized = () => c.json({ message: "Unauthorized." }, 401)
@@ -10,7 +10,7 @@ export const requireAuth = factory.createMiddleware(async (c, next) => {
 		return unauthorized()
 	}
 
-	const payload = await verifyAccessToken(token, c.env.SERO_POS_JWT_SECRET)
+	const payload = await JWT.verifyAccessToken(token, c.env.SERO_POS_JWT_SECRET)
 	if (!payload) return unauthorized()
 
 	c.set("userId", payload.sub)

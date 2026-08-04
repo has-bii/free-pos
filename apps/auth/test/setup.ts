@@ -22,27 +22,21 @@ const databaseNameFrom = (url: string): string | null => {
 // Guard 1: missing config. Throwing rather than skipping is deliberate — a
 // green run that executed nothing is worse than a red one.
 if (!env.SERO_POS_DATABASE_URL) {
-	throw new Error(
-		"TEST_DATABASE_URL is not set. Copy apps/auth/.env.test.example to .env.test.",
-	)
+	throw new Error("TEST_DATABASE_URL is not set. Copy apps/auth/.env.test.example to .env.test.")
 }
 
 // Guard 2: wrong database. The suite issues DELETEs; a copy-pasted production
 // URL must be an instant, obvious error rather than a catastrophe.
 const databaseName = databaseNameFrom(env.SERO_POS_DATABASE_URL)
 if (!databaseName || !/test/i.test(databaseName)) {
-	throw new Error(
-		`Refusing to run: database "${databaseName ?? ""}" does not look like a test database.`,
-	)
+	throw new Error(`Refusing to run: database "${databaseName ?? ""}" does not look like a test database.`)
 }
 
 // Guard 3: migration drift. Test runs never perform DDL, so a migration added
 // after the last `db:migrate` against this database would otherwise surface
 // as a confusing column-not-found error mid-suite.
 const db = createDatabaseClient(env.SERO_POS_DATABASE_URL)
-const result = await db.execute(
-	sql`select count(*) as n from __drizzle_migrations`,
-)
+const result = await db.execute(sql`select count(*) as n from __drizzle_migrations`)
 const firstRow = (result.rows ?? [])[0] as Record<string, unknown> | undefined
 const appliedCount = Number(firstRow?.n ?? 0)
 const expectedCount = journal.entries.length

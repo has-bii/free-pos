@@ -25,18 +25,10 @@ const timingSafeEqual = (a: Uint8Array, b: Uint8Array): boolean => {
 	return diff === 0
 }
 
-const derive = async (
-	password: string,
-	salt: Uint8Array,
-	iterations: number,
-): Promise<Uint8Array> => {
-	const keyMaterial = await crypto.subtle.importKey(
-		"raw",
-		new TextEncoder().encode(password),
-		"PBKDF2",
-		false,
-		["deriveBits"],
-	)
+const derive = async (password: string, salt: Uint8Array, iterations: number): Promise<Uint8Array> => {
+	const keyMaterial = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, [
+		"deriveBits",
+	])
 	const bits = await crypto.subtle.deriveBits(
 		{ name: "PBKDF2", hash: "SHA-256", salt, iterations },
 		keyMaterial,
@@ -53,10 +45,7 @@ export const hashPassword = async (password: string): Promise<string> => {
 	return `${ALGORITHM}$${ITERATIONS}$${toBase64(salt)}$${toBase64(hash)}`
 }
 
-export const verifyPassword = async (
-	password: string,
-	stored: string,
-): Promise<boolean> => {
+export const verifyPassword = async (password: string, stored: string): Promise<boolean> => {
 	const parts = stored.split("$")
 	if (parts.length !== 4) return false
 	const [algorithm, iterationsStr, saltBase64, hashBase64] = parts
