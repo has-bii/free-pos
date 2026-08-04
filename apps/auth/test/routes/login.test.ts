@@ -100,7 +100,7 @@ describe("POST /login/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(body.error.email).toBe("Enter a valid email address.")
+		expect(body.error.email).toEqual({ message: "Enter a valid email address." })
 	})
 
 	// Case 15
@@ -110,7 +110,7 @@ describe("POST /login/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(body.error.password).toBe("Password is required.")
+		expect(body.error.password).toEqual({ message: "Password is required." })
 	})
 
 	// Case 16

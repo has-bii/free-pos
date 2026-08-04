@@ -34,7 +34,7 @@ export type MeSuccessBody = { message: string; data: { user: UserBody } }
 
 export type ValidationFailureBody = {
 	message: string
-	error: Record<string, string>
+	error: Record<string, { message: string }>
 }
 
 export type MessageBody = { message: string }

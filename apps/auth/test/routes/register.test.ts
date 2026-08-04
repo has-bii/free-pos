@@ -124,7 +124,7 @@ describe("POST /register/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(body.error.name).toBe("Name is required.")
+		expect(body.error.name).toEqual({ message: "Name is required." })
 	})
 
 	// Case 6
@@ -137,7 +137,7 @@ describe("POST /register/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(body.error.email).toBe("Enter a valid email address.")
+		expect(body.error.email).toEqual({ message: "Enter a valid email address." })
 	})
 
 	// Case 7
@@ -150,7 +150,7 @@ describe("POST /register/email", () => {
 
 		const body = await readJson<ValidationFailureBody>(res)
 		expect(body.message).toBe("Validation failed.")
-		expect(body.error.password).toBe("Password must be at least 8 characters.")
+		expect(body.error.password).toEqual({ message: "Password must be at least 8 characters." })
 	})
 
 	// Case 8a — a non-JSON content type makes Hono's validator skip parsing and
