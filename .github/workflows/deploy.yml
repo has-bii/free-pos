@@ -20,6 +20,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Same database the Worker's SERO_POS_DATABASE_URL secret points at, but
+      # under drizzle-kit's own DATABASE_URL env var (see packages/database/CLAUDE.md).
+      # Migrations run before deploy so new code never sees an old schema.
+      - name: Apply migrations to the production database
+        run: pnpm --filter @repo/database db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
       - name: Deploy auth to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

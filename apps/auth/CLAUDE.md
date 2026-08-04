@@ -30,7 +30,9 @@ Copy `.dev.vars.example` to `.dev.vars` and fill in:
 - `SERO_POS_DATABASE_URL` — TiDB connection string (see `packages/database/.env.example` for the required format/ssl param)
 - `SERO_POS_JWT_SECRET` — HS256 signing secret
 - `SERO_POS_FRONTEND_ORIGIN` — exact-match origin allowed by CORS (e.g. the frontend's local dev URL); required in every environment
-- `SERO_POS_COOKIE_DOMAIN` — access-token cookie `Domain`. Leave empty in `.dev.vars` (host-only cookie, matching how the shared `sero-pos.com` registrable domain doesn't exist locally); set to `.sero-pos.com` in prod via `wrangler.jsonc`'s `vars` (safe to commit — unlike the two secrets above, it isn't sensitive)
+- `SERO_POS_COOKIE_DOMAIN` — access-token cookie `Domain`. Leave empty in `.dev.vars` (host-only cookie, matching how the shared `sero-pos.com` registrable domain doesn't exist locally); set to `.sero-pos.com` in prod via `wrangler secret put SERO_POS_COOKIE_DOMAIN`
+
+All four are set on the production Worker via `wrangler secret put <NAME>` (see the comment in `wrangler.jsonc`) — none of them appear there, `vars` is unused.
 
 `worker-configuration.d.ts` is wrangler-generated (`pnpm cf-typegen`) and declares the `CloudflareBindings` type consumed by `AppEnv` in `src/factory.ts`. Re-run `cf-typegen` after adding/renaming a binding in `.dev.vars` or `wrangler.jsonc`.
 
