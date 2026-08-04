@@ -22,7 +22,7 @@ afterAll(async () => {
 	await deleteTestUsersByEmail(createdEmails)
 })
 
-const PATH = "/auth/login/email"
+const PATH = "/login/email"
 
 // One shared fixture for the whole file: registering costs a real
 // 50,000-iteration PBKDF2 hash plus several TiDB round-trips.
@@ -32,7 +32,7 @@ beforeAll(async () => {
 	fixture = await registerUser({ email: track(uniqueEmail()) })
 })
 
-describe("POST /auth/login/email", () => {
+describe("POST /login/email", () => {
 	// Case 10
 	it("returns the user and sets auth cookies for correct credentials", async () => {
 		const res = await postJson(PATH, {

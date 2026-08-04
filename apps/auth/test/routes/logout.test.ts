@@ -22,7 +22,7 @@ afterAll(async () => {
 	await deleteTestUsersByEmail(createdEmails)
 })
 
-const PATH = "/auth/logout"
+const PATH = "/logout"
 
 const expectUnauthorized = async (res: Response) => {
 	expect(res.status).toBe(401)
@@ -35,7 +35,7 @@ const accessTokenOf = (fixture: Awaited<ReturnType<typeof registerUser>>): strin
 	return token
 }
 
-describe("POST /auth/logout", () => {
+describe("POST /logout", () => {
 	// Case 1
 	it("deletes the session backing the caller's access token, and clears both cookies", async () => {
 		const fixture = await registerUser({ email: track(uniqueEmail()) })
@@ -60,7 +60,7 @@ describe("POST /auth/logout", () => {
 
 		await post(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, accessTokenOf(fixture)))
 
-		const refreshRes = await post("/auth/refresh", cookieHeader(REFRESH_TOKEN_COOKIE_NAME, refreshToken))
+		const refreshRes = await post("/refresh", cookieHeader(REFRESH_TOKEN_COOKIE_NAME, refreshToken))
 		expect(refreshRes.status).toBe(401)
 		expect((await readJson<MessageBody>(refreshRes)).message).toBe("Invalid or expired refresh token.")
 	})
@@ -94,7 +94,7 @@ describe("POST /auth/logout", () => {
 
 		await post(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, token))
 
-		const me = await get("/auth/me", cookieHeader(ACCESS_TOKEN_COOKIE_NAME, token))
+		const me = await get("/me", cookieHeader(ACCESS_TOKEN_COOKIE_NAME, token))
 		expect(me.status).toBe(200)
 		const meBody = await readJson<MeSuccessBody>(me)
 		expect(meBody.data.user.id).toBe(fixture.user.id)

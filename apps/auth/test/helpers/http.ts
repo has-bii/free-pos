@@ -76,7 +76,7 @@ type StoredCookie = { value: string; path: string }
 /**
  * Enough of RFC 6265 to stand in for a browser across a test: absorbs
  * `Set-Cookie` from responses, tracks each cookie's `Path`, and only replays a
- * cookie on requests its path covers (so the refresh cookie's `Path=/auth/refresh`
+ * cookie on requests its path covers (so the refresh cookie's `Path=/refresh`
  * scoping is actually exercised rather than papered over).
  */
 export class CookieJar {
@@ -169,7 +169,7 @@ export class TestClient {
  * Seeds a user through the real register endpoint (never through the teardown
  * DB client), so fixtures match production writes exactly. Returns a
  * `TestClient` already carrying the cookies `Set-Cookie` put on the response,
- * for tests that continue the session (e.g. calling `/auth/me`).
+ * for tests that continue the session (e.g. calling `/me`).
  */
 export const registerUser = async (overrides: { name?: string; email?: string; password?: string } = {}) => {
 	const name = overrides.name ?? "Test User"
@@ -177,7 +177,7 @@ export const registerUser = async (overrides: { name?: string; email?: string; p
 	const password = overrides.password ?? DEFAULT_PASSWORD
 
 	const client = new TestClient()
-	const res = await client.postJson("/auth/register/email", { name, email, password })
+	const res = await client.postJson("/register/email", { name, email, password })
 	if (res.status !== 201) {
 		throw new Error(`Fixture registration failed: ${res.status} ${await res.text()}`)
 	}

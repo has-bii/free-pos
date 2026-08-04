@@ -23,7 +23,7 @@ afterAll(async () => {
 	await deleteTestUsersByEmail(createdEmails)
 })
 
-const PATH = "/auth/refresh"
+const PATH = "/refresh"
 
 // One shared fixture for most cases; a fresh user is only needed where the
 // user itself must be deleted or the session row is asserted on directly.
@@ -53,7 +53,7 @@ const expectInvalidToken = async (res: Response) => {
 	expect(cookies.some((c) => c.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`) && c.includes("Max-Age=0"))).toBe(true)
 }
 
-describe("POST /auth/refresh", () => {
+describe("POST /refresh", () => {
 	// Case 27
 	it("rotates a valid refresh token", async () => {
 		const oldAccessToken = fixture.client.jar.get(ACCESS_TOKEN_COOKIE_NAME)
@@ -61,7 +61,7 @@ describe("POST /auth/refresh", () => {
 		if (!oldAccessToken || !oldRefreshToken) throw new Error("expected register to set both cookies")
 
 		await sleep(1100)
-		// The refresh cookie is Path-scoped to /auth/refresh, so the client's
+		// The refresh cookie is Path-scoped to /refresh, so the client's
 		// jar attaches it automatically here — this exercises that scoping.
 		const res = await fixture.client.post(PATH)
 		expect(res.status).toBe(200)
@@ -75,7 +75,7 @@ describe("POST /auth/refresh", () => {
 		expect(newRefreshToken).not.toBe(oldRefreshToken)
 
 		// Case 28 — the new access token authenticates.
-		const me = await fixture.client.get("/auth/me")
+		const me = await fixture.client.get("/me")
 		expect(me.status).toBe(200)
 		const meBody = await readJson<MeSuccessBody>(me)
 		expect(meBody.data.user.id).toBe(fixture.user.id)

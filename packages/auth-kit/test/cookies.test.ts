@@ -48,7 +48,7 @@ describe("setAuthCookies", () => {
 
 		const refresh = findCookie(cookies, REFRESH_TOKEN_COOKIE_NAME)
 		expect(refresh).toEqual(
-			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/auth/refresh", "Max-Age=2592000"]),
+			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/refresh", "Max-Age=2592000"]),
 		)
 		expect(refresh).not.toEqual(expect.arrayContaining([expect.stringMatching(/^Domain=/)]))
 	})
@@ -75,7 +75,7 @@ describe("clearAuthCookies", () => {
 		expect(access).toEqual(expect.arrayContaining(["Max-Age=0", "Path=/"]))
 
 		const refresh = findCookie(cookies, REFRESH_TOKEN_COOKIE_NAME)
-		expect(refresh).toEqual(expect.arrayContaining(["Max-Age=0", "Path=/auth/refresh"]))
+		expect(refresh).toEqual(expect.arrayContaining(["Max-Age=0", "Path=/refresh"]))
 	})
 
 	it("matches the Domain used when setting, so the browser actually deletes it", async () => {

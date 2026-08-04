@@ -8,7 +8,7 @@ export const REFRESH_TOKEN_COOKIE_NAME = "sero_pos_refresh_token"
 // The refresh cookie is deliberately scoped to this single path — it must
 // never be sent to any other route, on any service, regardless of
 // `cookieDomain`.
-const REFRESH_TOKEN_PATH = "/auth/refresh"
+const REFRESH_TOKEN_PATH = "/refresh"
 
 type AuthCookieConfig = {
 	/** Unset for a host-only cookie (local dev). Never applied to the refresh cookie. */

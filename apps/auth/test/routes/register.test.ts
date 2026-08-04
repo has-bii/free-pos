@@ -22,7 +22,7 @@ afterAll(async () => {
 	await deleteTestUsersByEmail(createdEmails)
 })
 
-const PATH = "/auth/register/email"
+const PATH = "/register/email"
 
 const validBody = (email: string) => ({
 	name: "Test User",
@@ -30,7 +30,7 @@ const validBody = (email: string) => ({
 	password: DEFAULT_PASSWORD,
 })
 
-describe("POST /auth/register/email", () => {
+describe("POST /register/email", () => {
 	// Case 1
 	it("creates a user and sets httpOnly auth cookies, never a token in the body", async () => {
 		const email = track(uniqueEmail())
@@ -52,7 +52,7 @@ describe("POST /auth/register/email", () => {
 			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/", "Max-Age=900"]),
 		)
 		expect(refresh?.split("; ")).toEqual(
-			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/auth/refresh", "Max-Age=2592000"]),
+			expect.arrayContaining(["HttpOnly", "Secure", "SameSite=Lax", "Path=/refresh", "Max-Age=2592000"]),
 		)
 	})
 

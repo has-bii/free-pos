@@ -38,10 +38,10 @@ const app = factory
 			return c.json({ status: "error" }, 503)
 		}
 	})
-	.route("/auth", registerRoutes)
-	.route("/auth", loginRoutes)
-	.route("/auth", refreshRoutes)
-	.route("/auth", meRoutes)
-	.route("/auth", logoutRoutes)
+	.route("/", registerRoutes)
+	.route("/", loginRoutes)
+	.route("/", refreshRoutes)
+	.route("/", meRoutes)
+	.route("/", logoutRoutes)
 
 export default app

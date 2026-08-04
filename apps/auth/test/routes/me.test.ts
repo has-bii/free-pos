@@ -24,7 +24,7 @@ afterAll(async () => {
 	await deleteTestUsersByEmail(createdEmails)
 })
 
-const PATH = "/auth/me"
+const PATH = "/me"
 
 let fixture: Awaited<ReturnType<typeof registerUser>>
 let accessToken: string
@@ -41,7 +41,7 @@ const expectUnauthorized = async (res: Response) => {
 	expect((await readJson<MessageBody>(res)).message).toBe("Unauthorized.")
 }
 
-describe("GET /auth/me", () => {
+describe("GET /me", () => {
 	// Case 17
 	it("returns the current user for a valid access token cookie", async () => {
 		const res = await get(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, accessToken))

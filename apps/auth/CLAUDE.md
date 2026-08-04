@@ -54,10 +54,10 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 
 - **Every test mints its own email**: `` const email = `t-${crypto.randomUUID()}@test.invalid` `` via `uniqueEmail()`. Nothing is truncated between tests and files run in parallel, so a hardcoded address is a latent flake — reject it in review.
 - Track every email you create and delete it in `afterAll` with `deleteTestUsersByEmail`. Deleting the `user` row cascades to `account` and `session`.
-- Seed fixtures through `registerUser()` (which calls the real `POST /auth/register/email`), never by inserting rows. `test/helpers/db.ts` is for teardown and assertions only.
+- Seed fixtures through `registerUser()` (which calls the real `POST /register/email`), never by inserting rows. `test/helpers/db.ts` is for teardown and assertions only.
 - Registering costs a real 50,000-iteration PBKDF2 hash plus TiDB round-trips, so share one fixture per file via `beforeAll` where the test doesn't need a fresh user. Timeouts are raised to 20s for this reason.
 - If a run is killed mid-suite, `t-*@test.invalid` rows survive. Harmless; clear them with `DELETE FROM user WHERE email LIKE 't-%@test.invalid'`.
-- **Tokens live in cookies, not the response body or `Authorization` header.** `test/helpers/http.ts`'s `CookieJar`/`TestClient` stand in for a browser: `registerUser()` returns a `client` (a `TestClient`) that already carries the `Set-Cookie` cookies from registration, and `client.get`/`client.post`/`client.postJson` replay whatever cookies in its jar apply to the request path — including respecting the refresh cookie's `Path=/auth/refresh` scoping, so a `client.post("/auth/refresh")` attaches it automatically while a `client.get("/auth/me")` does not. Grab a raw cookie value with `client.jar.get(ACCESS_TOKEN_COOKIE_NAME)` (from `@repo/auth-kit/cookies`) when a test needs to replay it manually — e.g. via the stateless `get`/`post` + `cookieHeader(name, value)` helpers — to hand-craft a forged/expired/garbage token, or to prove a token remains valid after the cookie instructing the browser to drop it has been cleared (see `logout.test.ts`'s idempotency case).
+- **Tokens live in cookies, not the response body or `Authorization` header.** `test/helpers/http.ts`'s `CookieJar`/`TestClient` stand in for a browser: `registerUser()` returns a `client` (a `TestClient`) that already carries the `Set-Cookie` cookies from registration, and `client.get`/`client.post`/`client.postJson` replay whatever cookies in its jar apply to the request path — including respecting the refresh cookie's `Path=/refresh` scoping, so a `client.post("/refresh")` attaches it automatically while a `client.get("/me")` does not. Grab a raw cookie value with `client.jar.get(ACCESS_TOKEN_COOKIE_NAME)` (from `@repo/auth-kit/cookies`) when a test needs to replay it manually — e.g. via the stateless `get`/`post` + `cookieHeader(name, value)` helpers — to hand-craft a forged/expired/garbage token, or to prove a token remains valid after the cookie instructing the browser to drop it has been cleared (see `logout.test.ts`'s idempotency case).
 
 ### Known limits
 
@@ -71,7 +71,7 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 
 ```
 src/
-  index.ts                 # app entry: CORS + db middleware, all module routes under /auth
+  index.ts                 # app entry: CORS + db middleware, all module routes mounted at root
   factory.ts                # createFactory<AppEnv>() — shared Bindings/Variables typing; exports AppEnv
   errors.ts                 # typed domain errors (e.g. EmailAlreadyExistsError)
   lib/                      # framework-agnostic helpers: password.ts, session.ts, request.ts
@@ -88,7 +88,7 @@ Adding a new authenticated endpoint: create a `modules/<name>/` following the `m
 
 - `*.schema.ts` — valibot input schema.
 - `*.handlers.ts` — `factory.createHandlers(validate(...), async (c) => ...)`; business logic lives here, talking to repositories, never to Drizzle tables directly.
-- `*.routes.ts` — thin: `factory.createApp().post("/path", ...handlers)`, mounted in `src/index.ts` via `.route("/auth", xRoutes)`.
+- `*.routes.ts` — thin: `factory.createApp().post("/path", ...handlers)`, mounted in `src/index.ts` via `.route("/", xRoutes)`.
 
 ## Repositories (`src/repositories/*.repository.ts`)
 
@@ -98,20 +98,20 @@ Plain object literals of async methods (`export const X = { ... }`) that are the
 
 - Passwords: PBKDF2-SHA256 via Web Crypto, implemented as the `Password` namespace in `src/lib/password.ts`. Iteration count is deliberately capped for the Workers free-tier 10ms CPU budget — see the comment there before changing `ITERATIONS`.
 - Tokens: short-lived access token + long-lived refresh token, both HS256 JWTs signed/verified by `@repo/auth-kit/jwt`'s `JWT` namespace (see `packages/auth-kit/CLAUDE.md`). `JWT.REFRESH_TOKEN_TTL_SECONDS` is the single source of truth for the refresh TTL — both `Session.createSession` and `Session.rotateSession` (`src/lib/session.ts`) compute the `session` row's `expiresAt` from it directly.
-- Tokens are delivered as `httpOnly`, `Secure`, `SameSite=Lax` cookies — `sero_pos_access_token` (`Path=/`, optionally `Domain=.sero-pos.com` in prod so any `*.sero-pos.com` service receives it) and `sero_pos_refresh_token` (`Path=/auth/refresh`, always host-only). Never returned in a JSON response body. `login.handlers.ts`/`register.handlers.ts` set both via `setAuthCookies` (`@repo/auth-kit/cookies`) after creating the session; `refresh.handlers.ts` sets fresh ones on a successful rotation and clears both (`clearAuthCookies`) on any failure path, so a dead refresh token doesn't linger in the browser; `logout.handlers.ts` clears both unconditionally.
+- Tokens are delivered as `httpOnly`, `Secure`, `SameSite=Lax` cookies — `sero_pos_access_token` (`Path=/`, optionally `Domain=.sero-pos.com` in prod so any `*.sero-pos.com` service receives it) and `sero_pos_refresh_token` (`Path=/refresh`, always host-only). Never returned in a JSON response body. `login.handlers.ts`/`register.handlers.ts` set both via `setAuthCookies` (`@repo/auth-kit/cookies`) after creating the session; `refresh.handlers.ts` sets fresh ones on a successful rotation and clears both (`clearAuthCookies`) on any failure path, so a dead refresh token doesn't linger in the browser; `logout.handlers.ts` clears both unconditionally.
 - CORS (`hono/cors`, mounted in `index.ts`) exact-matches `Origin` against `SERO_POS_FRONTEND_ORIGIN` and sets `credentials: true` — required for the browser to send/receive cookies cross-origin from `app.sero-pos.com`. No separate CSRF token: `SameSite=Lax` is the sole defense, which works because `app.sero-pos.com` and `auth.sero-pos.com` share the registrable domain `sero-pos.com` and so are same-site.
-- Sessions are rows in the `session` table keyed by a `uuidv7` `id` that is the stable session identity and never changes. `token` is a separate `uuidv7`, the rotating credential embedded as the refresh JWT's `jti`; `id` is embedded as `sid` in both tokens. `POST /auth/refresh` (`modules/refresh/`) reads the presented refresh token from its cookie (no JSON body — there's no `refresh.schema.ts`), verifies it, then `SessionRepository.rotateToken` does a compare-and-swap on `token` (matching on the old value, writing a new `token` + `expiresAt`) so a replayed/stale refresh token fails closed — see the comments in `src/lib/session.ts` and `session.repository.ts` for the invariants this depends on.
+- Sessions are rows in the `session` table keyed by a `uuidv7` `id` that is the stable session identity and never changes. `token` is a separate `uuidv7`, the rotating credential embedded as the refresh JWT's `jti`; `id` is embedded as `sid` in both tokens. `POST /refresh` (`modules/refresh/`) reads the presented refresh token from its cookie (no JSON body — there's no `refresh.schema.ts`), verifies it, then `SessionRepository.rotateToken` does a compare-and-swap on `token` (matching on the old value, writing a new `token` + `expiresAt`) so a replayed/stale refresh token fails closed — see the comments in `src/lib/session.ts` and `session.repository.ts` for the invariants this depends on.
 - `requireAuth` (`@repo/auth-kit/middleware/auth`) reads the access token from its cookie and sets `c.var.userId`/`c.var.sessionId`; it does not touch the DB. Handlers needing the full user row still look it up via `UserRepository.findById`.
 - `requestMeta(c)` (`src/lib/request.ts`) extracts `CF-Connecting-IP` / `User-Agent` for session metadata.
 
 ## Known limitations (see `docs/prd/httponly-cookie-auth.md`)
 
-- **Concurrent refresh race**: two parallel requests hitting an expired access token can both trigger `/auth/refresh`; only the first CAS wins, the second gets a spurious 401. Not solved server-side — the frontend's API client must coalesce concurrent refresh triggers into one in-flight request.
+- **Concurrent refresh race**: two parallel requests hitting an expired access token can both trigger `/refresh`; only the first CAS wins, the second gets a spurious 401. Not solved server-side — the frontend's API client must coalesce concurrent refresh triggers into one in-flight request.
 - **Shared HS256 secret**: widening the access-token cookie's `Domain` to `.sero-pos.com` means every future verifying service needs `SERO_POS_JWT_SECRET` distributed to it. Deferred until a second service actually exists (would move to RS256/JWKS).
 
 ## Conventions specific to this app
 
-- Routes are mounted with a shared `/auth` prefix in `index.ts` (`.route("/auth", xRoutes)`) — an individual `*.routes.ts` file should define paths relative to that (e.g. `/register/email`, not `/auth/register/email`).
+- Routes are mounted at the root in `index.ts` (`.route("/", xRoutes)`) — the service is deployed on its own `auth.sero-pos.com` subdomain, so an individual `*.routes.ts` file defines paths directly (e.g. `/register/email`), with no additional prefix.
 - Handlers return **only** `c.json(...)`; there's no shared response envelope helper — the `{ message, data }` shape used in `register`/`login`/`me` handlers is convention, not enforced by a type, so match it when adding endpoints.
 - Repositories translate constraint violations into errors from `src/errors.ts` (see `UserRepository.insert`'s `ER_DUP_ENTRY` handling) — handlers catch these typed errors rather than inspecting driver error codes/messages themselves.
 - `login`/`register` currently pass `{ ipAddress: null, userAgent: null }` into `createSession` rather than `requestMeta(c)` from `src/lib/request.ts` — if you touch session creation, check whether wiring `requestMeta` in is in scope for that change.
