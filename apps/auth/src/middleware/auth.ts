@@ -14,5 +14,6 @@ export const requireAuth = factory.createMiddleware(async (c, next) => {
 	if (!payload) return unauthorized()
 
 	c.set("userId", payload.sub)
+	c.set("sessionId", payload.sid)
 	await next()
 })

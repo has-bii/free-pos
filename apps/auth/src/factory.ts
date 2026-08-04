@@ -6,7 +6,7 @@ export type DatabaseExecutor = Database | Transaction
 
 type AppEnv = {
 	Bindings: CloudflareBindings
-	Variables: { db: Database; userId: string }
+	Variables: { db: Database; userId: string; sessionId: string }
 }
 
 export const factory = createFactory<AppEnv>()

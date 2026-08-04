@@ -57,6 +57,10 @@ export const get = (path: string, headers?: HeadersInit) => {
 	return worker.fetch(`${ORIGIN}${path}`, headers ? { headers } : undefined)
 }
 
+export const post = (path: string, headers?: HeadersInit) => {
+	return worker.fetch(`${ORIGIN}${path}`, headers ? { method: "POST", headers } : { method: "POST" })
+}
+
 export const postJson = (path: string, body: unknown) => {
 	return worker.fetch(`${ORIGIN}${path}`, {
 		method: "POST",

@@ -40,4 +40,8 @@ export const SessionRepository = {
 		// `rowsAffected` is `number | null` on @tidbcloud/serverless; null fails closed.
 		return result.rowsAffected === 1
 	},
+
+	deleteById: async (db: DatabaseExecutor, sessionId: string, userId: string): Promise<void> => {
+		await db.delete(session).where(and(eq(session.id, sessionId), eq(session.userId, userId)))
+	},
 }
