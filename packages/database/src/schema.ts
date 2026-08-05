@@ -1,4 +1,4 @@
-import { boolean, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core"
+import { boolean, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
 import { uuidv7 } from "uuidv7"
 
 export const user = mysqlTable("user", {
@@ -28,19 +28,28 @@ export const session = mysqlTable("session", {
 	updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 })
 
-export const account = mysqlTable("account", {
-	id: varchar("id", { length: 36 })
-		.primaryKey()
-		.$defaultFn(() => uuidv7()),
-	userId: varchar("user_id", { length: 36 })
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-	accountId: varchar("account_id", { length: 255 }).notNull(),
-	providerId: varchar("provider_id", { length: 255 }).notNull(),
-	password: text("password"),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
-})
+export const account = mysqlTable(
+	"account",
+	{
+		id: varchar("id", { length: 36 })
+			.primaryKey()
+			.$defaultFn(() => uuidv7()),
+		userId: varchar("user_id", { length: 36 })
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		accountId: varchar("account_id", { length: 255 }).notNull(),
+		providerId: varchar("provider_id", { length: 255 }).notNull(),
+		password: text("password"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+	},
+	(table) => [
+		// Backstop for OAuth link/create races (e.g. double-tapped callbacks): a
+		// provider account can map to at most one `account` row. See
+		// docs/prd/google-oauth.md.
+		uniqueIndex("account_provider_account_unique").on(table.providerId, table.accountId),
+	],
+)
 
 export const verification = mysqlTable("verification", {
 	id: varchar("id", { length: 36 })
