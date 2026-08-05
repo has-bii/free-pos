@@ -1,7 +1,7 @@
 {
 	"version": "5",
 	"dialect": "mysql",
-	"id": "ae7e6881-4e52-4302-a85b-ef89e2f3ee0a",
+	"id": "bc02ce4a-441e-4365-85a7-f7e085b45c77",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
 		"account": {
@@ -262,7 +262,7 @@
 				},
 				"value": {
 					"name": "value",
-					"type": "text",
+					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
@@ -300,7 +300,12 @@
 					"columns": ["id"]
 				}
 			},
-			"uniqueConstraints": {},
+			"uniqueConstraints": {
+				"verification_value_unique": {
+					"name": "verification_value_unique",
+					"columns": ["value"]
+				}
+			},
 			"checkConstraint": {}
 		}
 	},

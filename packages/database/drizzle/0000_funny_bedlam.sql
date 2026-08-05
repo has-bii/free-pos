@@ -37,11 +37,12 @@ CREATE TABLE `user` (
 CREATE TABLE `verification` (
 	`id` varchar(36) NOT NULL,
 	`identifier` varchar(255) NOT NULL,
-	`value` text NOT NULL,
+	`value` varchar(255) NOT NULL,
 	`expires_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `verification_id` PRIMARY KEY(`id`)
+	CONSTRAINT `verification_id` PRIMARY KEY(`id`),
+	CONSTRAINT `verification_value_unique` UNIQUE(`value`)
 );
 --> statement-breakpoint
 ALTER TABLE `account` ADD CONSTRAINT `account_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

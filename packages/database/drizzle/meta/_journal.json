@@ -5,15 +5,8 @@
 		{
 			"idx": 0,
 			"version": "5",
-			"when": 1785662976645,
-			"tag": "0000_typical_george_stacy",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "5",
-			"when": 1785904452650,
-			"tag": "0001_legal_praxagora",
+			"when": 1785917654845,
+			"tag": "0000_funny_bedlam",
 			"breakpoints": true
 		}
 	]
