@@ -3,7 +3,7 @@ import SubmitButton from "@repo/frontend/components/forms/SubmitButton"
 import { APP_NAME } from "@repo/frontend/lib/config"
 import { GoogleIcon } from "@repo/frontend/modules/auth/components/GoogleIcon"
 import { useLoginForm } from "@repo/frontend/modules/auth/hooks/useLoginForm"
-import { Alert, AlertTitle } from "@repo/ui/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/ui/alert"
 import { Button } from "@repo/ui/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card"
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@repo/ui/components/ui/field"
@@ -27,7 +27,8 @@ export default function LoginForm() {
 					{reset === "success" && (
 						<Alert className="max-w-md">
 							<CheckCircle2Icon />
-							<AlertTitle>Password updated. Log in with your new password.</AlertTitle>
+							<AlertTitle>Password updated.</AlertTitle>
+							<AlertDescription>Log in with your new password.</AlertDescription>
 						</Alert>
 					)}
 					<form
