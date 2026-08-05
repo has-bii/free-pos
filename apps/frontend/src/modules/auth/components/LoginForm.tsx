@@ -1,6 +1,6 @@
 import InputPassword from "@repo/frontend/components/forms/InputPassword"
 import SubmitButton from "@repo/frontend/components/forms/SubmitButton"
-import { APP_NAME } from "@repo/frontend/lib/config"
+import { APP_NAME, AUTH_API_URL } from "@repo/frontend/lib/config"
 import { GoogleIcon } from "@repo/frontend/modules/auth/components/GoogleIcon"
 import { useLoginForm } from "@repo/frontend/modules/auth/hooks/useLoginForm"
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/ui/alert"
@@ -125,7 +125,7 @@ export default function LoginForm() {
 						type="button"
 						variant="outline"
 						className="w-full"
-						onClick={() => console.log("continue with google")}
+						onClick={() => window.location.assign(`${AUTH_API_URL}/login/google?returnTo=${encodeURIComponent("/")}`)}
 					>
 						<GoogleIcon className="size-4" />
 						Continue with Google

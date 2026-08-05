@@ -1,6 +1,7 @@
 import { EmailAlreadyExistsError } from "@repo/auth/errors"
 import { factory } from "@repo/auth/factory"
 import { Password } from "@repo/auth/lib/password"
+import { requestMeta } from "@repo/auth/lib/request"
 import { Session } from "@repo/auth/lib/session"
 import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
@@ -50,10 +51,11 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 		throw err
 	}
 
-	const { session, accessToken, refreshToken } = await Session.createSession(userId, c.env.FREE_POS_JWT_SECRET, {
-		ipAddress: null,
-		userAgent: null,
-	})
+	const { session, accessToken, refreshToken } = await Session.createSession(
+		userId,
+		c.env.FREE_POS_JWT_SECRET,
+		requestMeta(c),
+	)
 	await SessionRepository.insert(db, session)
 
 	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.FREE_POS_COOKIE_DOMAIN })

@@ -9,3 +9,7 @@ FREE_POS_COOKIE_DOMAIN=
 FREE_POS_EMAIL_API_KEY=
 # Resend "from" address. Sending domain must be verified in the Resend dashboard.
 FREE_POS_EMAIL_FROM=Free POS <no-reply@yourdomain.com>
+# Google OAuth. Keep the client secret server-side; do not expose it to the frontend.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8787/login/google/callback

@@ -8,10 +8,13 @@
 	"observability": {
 		"enabled": true
 	},
-	// All six bindings (FREE_POS_DATABASE_URL, FREE_POS_JWT_SECRET, FREE_POS_FRONTEND_ORIGIN,
-	// FREE_POS_COOKIE_DOMAIN, FREE_POS_EMAIL_API_KEY, FREE_POS_EMAIL_FROM) are real secrets
+	// All nine bindings (FREE_POS_DATABASE_URL, FREE_POS_JWT_SECRET, FREE_POS_FRONTEND_ORIGIN,
+	// FREE_POS_COOKIE_DOMAIN, FREE_POS_EMAIL_API_KEY, FREE_POS_EMAIL_FROM, GOOGLE_CLIENT_ID,
+	// GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI) are configured out-of-band. The client ID and
+	// redirect URI are not secret, but keeping them in bindings keeps local and production config
+	// explicit; the client secret must never be exposed to the frontend.
 	// configured out-of-band via `wrangler secret put` and never appear in this file. `.dev.vars`
-	// supplies all six for local dev — see .dev.vars.example.
+	// supplies all nine for local dev — see .dev.vars.example.
 	"dev": {
 		"port": 8787
 	}

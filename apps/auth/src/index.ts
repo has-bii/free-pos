@@ -1,6 +1,7 @@
 import type { AppEnv } from "@repo/auth/factory"
 import { factory } from "@repo/auth/factory"
 import { dbMiddleware } from "@repo/auth/middleware/db"
+import { googleRoutes } from "@repo/auth/modules/google/google.routes"
 import { loginRoutes } from "@repo/auth/modules/login/login.routes"
 import { logoutRoutes } from "@repo/auth/modules/logout/logout.routes"
 import { meRoutes } from "@repo/auth/modules/me/me.routes"
@@ -42,6 +43,7 @@ const app = factory
 	})
 	.route("/", registerRoutes)
 	.route("/", loginRoutes)
+	.route("/", googleRoutes)
 	.route("/", refreshRoutes)
 	.route("/", recoveryRoutes)
 	.route("/", meRoutes)

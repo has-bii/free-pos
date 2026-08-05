@@ -36,6 +36,9 @@ export default defineConfig({
 					// these — the key is deliberately empty, the from is a test address.
 					FREE_POS_EMAIL_API_KEY: "",
 					FREE_POS_EMAIL_FROM: "Free POS <no-reply@test.invalid>",
+					GOOGLE_CLIENT_ID: "test-google-client-id",
+					GOOGLE_CLIENT_SECRET: "test-google-client-secret",
+					GOOGLE_REDIRECT_URI: "https://auth.test.invalid/login/google/callback",
 				},
 			},
 		}),

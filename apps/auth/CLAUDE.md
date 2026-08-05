@@ -33,8 +33,11 @@ Copy `.dev.vars.example` to `.dev.vars` and fill in:
 - `FREE_POS_COOKIE_DOMAIN` — access-token cookie `Domain`. Leave empty in `.dev.vars` (host-only cookie, matching how the shared `yourdomain.com` registrable domain doesn't exist locally); set to `.yourdomain.com` in prod via `wrangler secret put FREE_POS_COOKIE_DOMAIN`
 - `FREE_POS_EMAIL_API_KEY` — Resend API key for password-reset email delivery. Empty/absent in local dev → `lib/email.ts` console-logs the would-be email (wrangler dev prints the clickable reset link); set in prod via `wrangler secret put FREE_POS_EMAIL_API_KEY`
 - `FREE_POS_EMAIL_FROM` — Resend `from` address (e.g. `Free POS <no-reply@yourdomain.com>`); the code falls back to that default when unset. The sending domain must be verified in the Resend dashboard
+- `GOOGLE_CLIENT_ID` — Google OAuth web client ID
+- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret; keep it only in Worker secrets
+- `GOOGLE_REDIRECT_URI` — exact callback URL, e.g. `http://localhost:8787/login/google/callback` locally or `https://auth.yourdomain.com/login/google/callback` in production
 
-All six are set on the production Worker via `wrangler secret put <NAME>` (see the comment in `wrangler.jsonc`) — none of them appear there, `vars` is unused.
+The database, JWT, frontend-origin, cookie-domain, email, and Google bindings are configured out-of-band on the production Worker using the repository's `wrangler secret put <NAME>` convention (see `wrangler.jsonc`). Do not commit their values. Register both the local and production callback URLs exactly in Google Cloud Console, and configure the consent screen/origins for the deployed frontend and auth domains.
 
 `worker-configuration.d.ts` is wrangler-generated (`pnpm cf-typegen`) and declares the `CloudflareBindings` type consumed by `AppEnv` in `src/factory.ts`. Re-run `cf-typegen` after adding/renaming a binding in `.dev.vars` or `wrangler.jsonc`.
 
@@ -50,7 +53,7 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 2. Apply migrations to it: point `DATABASE_URL` in `packages/database/.env` at the new database and run `pnpm --filter @repo/database db:migrate`. Test runs never perform DDL, so this is manual — after adding a migration, re-run it or `test/setup.ts`'s drift guard refuses to start the suite (see Known limits).
 3. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL` to that same connection string.
 
-`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). It also hardcodes `FREE_POS_EMAIL_API_KEY` (empty) and `FREE_POS_EMAIL_FROM` — but tests never touch them: `test/helpers/email.ts` swaps `emailSender.current` for a capture fake, so the suite asserts on what *would* have been sent without ever calling Resend. These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
+`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). It also hardcodes `FREE_POS_EMAIL_API_KEY` (empty), `FREE_POS_EMAIL_FROM`, and deterministic Google OAuth bindings — but tests never call Google: route tests replace the `googleProvider` boundary with controlled responses. These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
 
 ### Writing tests
 
