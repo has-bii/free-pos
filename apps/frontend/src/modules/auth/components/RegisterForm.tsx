@@ -2,17 +2,17 @@ import InputPassword from "@repo/frontend/components/forms/InputPassword"
 import SubmitButton from "@repo/frontend/components/forms/SubmitButton"
 import { APP_NAME } from "@repo/frontend/lib/config"
 import { GoogleIcon } from "@repo/frontend/modules/auth/components/GoogleIcon"
-import { useLoginForm } from "@repo/frontend/modules/auth/hooks/useLoginForm"
+import { useRegisterForm } from "@repo/frontend/modules/auth/hooks/useRegisterForm"
 import { Alert, AlertTitle } from "@repo/ui/components/ui/alert"
 import { Button } from "@repo/ui/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card"
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@repo/ui/components/ui/field"
 import { Input } from "@repo/ui/components/ui/input"
 import { Link } from "@tanstack/react-router"
-import { AlertCircleIcon, LogIn } from "lucide-react"
+import { AlertCircleIcon, UserPlus } from "lucide-react"
 
-export default function LoginForm() {
-	const form = useLoginForm()
+export default function RegisterForm() {
+	const form = useRegisterForm()
 
 	return (
 		<Card className="w-full max-w-sm">
@@ -39,6 +39,29 @@ export default function LoginForm() {
 										</Alert>
 									) : null
 								}
+							/>
+
+							<form.Field
+								name="name"
+								children={(field) => {
+									const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+
+									return (
+										<Field data-invalid={isInvalid}>
+											<FieldLabel htmlFor={field.name}>Name</FieldLabel>
+											<Input
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-invalid={isInvalid}
+												autoComplete="name"
+											/>
+											{isInvalid && <FieldError errors={field.state.meta.errors} />}
+										</Field>
+									)
+								}}
 							/>
 
 							<form.Field
@@ -79,7 +102,29 @@ export default function LoginForm() {
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
 												aria-invalid={isInvalid}
-												autoComplete="current-password"
+												autoComplete="new-password"
+											/>
+											{isInvalid && <FieldError errors={field.state.meta.errors} />}
+										</Field>
+									)
+								}}
+							/>
+
+							<form.Field
+								name="confirmPassword"
+								children={(field) => {
+									const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+									return (
+										<Field data-invalid={isInvalid}>
+											<FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
+											<InputPassword
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-invalid={isInvalid}
+												autoComplete="new-password"
 											/>
 											{isInvalid && <FieldError errors={field.state.meta.errors} />}
 										</Field>
@@ -96,8 +141,8 @@ export default function LoginForm() {
 										disabled={!canSubmit || !isDirty}
 										isLoading={isSubmitting}
 									>
-										Log in
-										<LogIn data-icon="inline-end" />
+										Create account
+										<UserPlus data-icon="inline-end" />
 									</SubmitButton>
 								)}
 							/>
@@ -117,9 +162,9 @@ export default function LoginForm() {
 					</Button>
 
 					<p className="text-center text-sm">
-						Don't have an account?{" "}
-						<Link to="/auth/register" className="underline underline-offset-4">
-							Create account
+						Already have an account?{" "}
+						<Link to="/auth/login" className="underline underline-offset-4">
+							Log in
 						</Link>
 					</p>
 				</FieldGroup>

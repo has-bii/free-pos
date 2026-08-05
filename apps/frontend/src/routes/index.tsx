@@ -1,3 +1,4 @@
+import { APP_NAME } from "@repo/frontend/lib/config"
 import { Button } from "@repo/ui/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card"
 import { createFileRoute } from "@tanstack/react-router"
@@ -11,7 +12,7 @@ function HomeComponent() {
 		<div className="flex min-h-svh items-center justify-center p-6">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
-					<CardTitle>Free POS</CardTitle>
+					<CardTitle>{APP_NAME}</CardTitle>
 					<CardDescription>Frontend scaffold is wired up.</CardDescription>
 				</CardHeader>
 				<CardContent>

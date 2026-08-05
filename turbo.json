@@ -9,7 +9,7 @@
 		"build": {
 			"dependsOn": ["^build", "typecheck"],
 			"outputs": ["dist/**"],
-			"env": ["VITE_AUTH_API_URL"]
+			"env": ["VITE_AUTH_API_URL", "VITE_APP_NAME"]
 		},
 		"lint": {
 			"dependsOn": ["^typecheck"]
