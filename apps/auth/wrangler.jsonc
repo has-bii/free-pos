@@ -8,10 +8,10 @@
 	"observability": {
 		"enabled": true
 	},
-	// All four bindings (FREE_POS_DATABASE_URL, FREE_POS_JWT_SECRET, FREE_POS_FRONTEND_ORIGIN,
-	// FREE_POS_COOKIE_DOMAIN) are real secrets configured out-of-band via `wrangler secret put`
-	// and never appear in this file. `.dev.vars` supplies all four for local dev — see
-	// .dev.vars.example.
+	// All six bindings (FREE_POS_DATABASE_URL, FREE_POS_JWT_SECRET, FREE_POS_FRONTEND_ORIGIN,
+	// FREE_POS_COOKIE_DOMAIN, FREE_POS_EMAIL_API_KEY, FREE_POS_EMAIL_FROM) are real secrets
+	// configured out-of-band via `wrangler secret put` and never appear in this file. `.dev.vars`
+	// supplies all six for local dev — see .dev.vars.example.
 	"dev": {
 		"port": 8787
 	}

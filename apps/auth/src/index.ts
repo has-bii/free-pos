@@ -4,6 +4,7 @@ import { dbMiddleware } from "@repo/auth/middleware/db"
 import { loginRoutes } from "@repo/auth/modules/login/login.routes"
 import { logoutRoutes } from "@repo/auth/modules/logout/logout.routes"
 import { meRoutes } from "@repo/auth/modules/me/me.routes"
+import { recoveryRoutes } from "@repo/auth/modules/recovery/recovery.routes"
 import { refreshRoutes } from "@repo/auth/modules/refresh/refresh.routes"
 import { registerRoutes } from "@repo/auth/modules/register/register.routes"
 import { sql } from "drizzle-orm"
@@ -42,6 +43,7 @@ const app = factory
 	.route("/", registerRoutes)
 	.route("/", loginRoutes)
 	.route("/", refreshRoutes)
+	.route("/", recoveryRoutes)
 	.route("/", meRoutes)
 	.route("/", logoutRoutes)
 

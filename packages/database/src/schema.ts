@@ -47,7 +47,10 @@ export const verification = mysqlTable("verification", {
 		.primaryKey()
 		.$defaultFn(() => uuidv7()),
 	identifier: varchar("identifier", { length: 255 }).notNull(),
-	value: text("value").notNull(),
+	// varchar + unique (not text) so the reset leg can look up by hashed token
+	// value — MySQL can't index a text column without a prefix length.
+	// Mirrors the session.token pattern; 64-hex-char SHA-256 hashes fit.
+	value: varchar("value", { length: 255 }).notNull().unique(),
 	expiresAt: timestamp("expires_at").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),

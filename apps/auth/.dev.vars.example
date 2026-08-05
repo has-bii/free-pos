@@ -4,3 +4,8 @@ FREE_POS_FRONTEND_ORIGIN=http://localhost:3000
 # Left unset on purpose: an empty override makes the access-token cookie
 # host-only in local dev, overriding the prod secret value (.yourdomain.com).
 FREE_POS_COOKIE_DOMAIN=
+# Resend delivery. Empty/absent -> the forgot-password flow falls back to
+# console.logging the would-be email (wrangler dev prints the clickable link).
+FREE_POS_EMAIL_API_KEY=
+# Resend "from" address. Sending domain must be verified in the Resend dashboard.
+FREE_POS_EMAIL_FROM=Free POS <no-reply@yourdomain.com>

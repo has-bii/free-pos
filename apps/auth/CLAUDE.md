@@ -31,8 +31,10 @@ Copy `.dev.vars.example` to `.dev.vars` and fill in:
 - `FREE_POS_JWT_SECRET` — HS256 signing secret
 - `FREE_POS_FRONTEND_ORIGIN` — exact-match origin allowed by CORS (e.g. the frontend's local dev URL); required in every environment
 - `FREE_POS_COOKIE_DOMAIN` — access-token cookie `Domain`. Leave empty in `.dev.vars` (host-only cookie, matching how the shared `yourdomain.com` registrable domain doesn't exist locally); set to `.yourdomain.com` in prod via `wrangler secret put FREE_POS_COOKIE_DOMAIN`
+- `FREE_POS_EMAIL_API_KEY` — Resend API key for password-reset email delivery. Empty/absent in local dev → `lib/email.ts` console-logs the would-be email (wrangler dev prints the clickable reset link); set in prod via `wrangler secret put FREE_POS_EMAIL_API_KEY`
+- `FREE_POS_EMAIL_FROM` — Resend `from` address (e.g. `Free POS <no-reply@yourdomain.com>`); the code falls back to that default when unset. The sending domain must be verified in the Resend dashboard
 
-All four are set on the production Worker via `wrangler secret put <NAME>` (see the comment in `wrangler.jsonc`) — none of them appear there, `vars` is unused.
+All six are set on the production Worker via `wrangler secret put <NAME>` (see the comment in `wrangler.jsonc`) — none of them appear there, `vars` is unused.
 
 `worker-configuration.d.ts` is wrangler-generated (`pnpm cf-typegen`) and declares the `CloudflareBindings` type consumed by `AppEnv` in `src/factory.ts`. Re-run `cf-typegen` after adding/renaming a binding in `.dev.vars` or `wrangler.jsonc`.
 
@@ -48,7 +50,7 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 2. Apply migrations to it: point `DATABASE_URL` in `packages/database/.env` at the new database and run `pnpm --filter @repo/database db:migrate`. Test runs never perform DDL, so this is manual — after adding a migration, re-run it or `test/setup.ts`'s drift guard refuses to start the suite (see Known limits).
 3. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL` to that same connection string.
 
-`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
+`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). It also hardcodes `FREE_POS_EMAIL_API_KEY` (empty) and `FREE_POS_EMAIL_FROM` — but tests never touch them: `test/helpers/email.ts` swaps `emailSender.current` for a capture fake, so the suite asserts on what *would* have been sent without ever calling Resend. These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
 
 ### Writing tests
 
@@ -74,7 +76,7 @@ src/
   index.ts                 # app entry: CORS + db middleware, all module routes mounted at root; exports AppWithErrors (RPC type)
   factory.ts                # createFactory<AppEnv>() — shared Bindings/Variables typing; exports AppEnv
   errors.ts                 # typed domain errors (e.g. EmailAlreadyExistsError)
-  lib/                      # framework-agnostic helpers: password.ts, session.ts, request.ts
+  lib/                      # framework-agnostic helpers: password.ts, session.ts, request.ts, email.ts, token.ts
   middleware/                # db.ts (attaches c.var.db), validate.ts (valibot)
   modules/<name>/            # *.schema.ts, *.handlers.ts, *.routes.ts — see Module layout below
   repositories/*.repository.ts   # only code that imports Drizzle tables from @repo/database

@@ -30,4 +30,8 @@ export const UserRepository = {
 			throw err
 		}
 	},
+
+	markEmailVerified: async (db: DatabaseExecutor, userId: string) => {
+		await db.update(user).set({ emailVerified: true }).where(eq(user.id, userId))
+	},
 }

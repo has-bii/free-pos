@@ -1,21 +1,28 @@
 import InputPassword from "@repo/frontend/components/forms/InputPassword"
 import SubmitButton from "@repo/frontend/components/forms/SubmitButton"
 import { APP_NAME } from "@repo/frontend/lib/config"
-import { GoogleIcon } from "@repo/frontend/modules/auth/components/GoogleIcon"
-import { useLoginForm } from "@repo/frontend/modules/auth/hooks/useLoginForm"
+import { useResetPasswordForm } from "@repo/frontend/modules/auth/hooks/useResetPasswordForm"
 import { Alert, AlertTitle } from "@repo/ui/components/ui/alert"
-import { Button } from "@repo/ui/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card"
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@repo/ui/components/ui/field"
-import { Input } from "@repo/ui/components/ui/input"
+import { Field, FieldError, FieldGroup, FieldLabel } from "@repo/ui/components/ui/field"
 import { Link, useSearch } from "@tanstack/react-router"
-import { AlertCircleIcon, CheckCircle2Icon, LogIn } from "lucide-react"
+import { AlertCircleIcon, ShieldCheckIcon } from "lucide-react"
 
-export default function LoginForm() {
-	const form = useLoginForm()
-	// Set by the reset-password page after a successful reset
-	// (navigate({ to: "/auth/login", search: { reset: "success" } })).
-	const { reset } = useSearch({ from: "/auth/login" })
+export default function ResetPasswordForm() {
+	const { token } = useSearch({ from: "/auth/reset-password" })
+
+	// No token in the URL — the link is incomplete or was stripped of its query.
+	if (!token) return <InvalidLinkCard />
+
+	return <ResetForm token={token} />
+}
+
+function ResetForm({ token }: { token: string }) {
+	const { form, tokenInvalid } = useResetPasswordForm(token)
+
+	// The submitted token turned out to be invalid/expired/consumed — the link
+	// is dead either way, so show the same dead-end-free state as a missing token.
+	if (tokenInvalid) return <InvalidLinkCard />
 
 	return (
 		<Card className="w-full max-w-sm">
@@ -24,12 +31,6 @@ export default function LoginForm() {
 			</CardHeader>
 			<CardContent>
 				<FieldGroup>
-					{reset === "success" && (
-						<Alert className="max-w-md">
-							<CheckCircle2Icon />
-							<AlertTitle>Password updated. Log in with your new password.</AlertTitle>
-						</Alert>
-					)}
 					<form
 						onSubmit={(e) => {
 							e.preventDefault()
@@ -51,22 +52,21 @@ export default function LoginForm() {
 							/>
 
 							<form.Field
-								name="email"
+								name="password"
 								children={(field) => {
 									const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
 
 									return (
 										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Email</FieldLabel>
-											<Input
+											<FieldLabel htmlFor={field.name}>New password</FieldLabel>
+											<InputPassword
 												id={field.name}
 												name={field.name}
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
 												aria-invalid={isInvalid}
-												placeholder="e.g. alex@gmail.com"
-												autoComplete="email"
+												autoComplete="new-password"
 											/>
 											{isInvalid && <FieldError errors={field.state.meta.errors} />}
 										</Field>
@@ -75,17 +75,13 @@ export default function LoginForm() {
 							/>
 
 							<form.Field
-								name="password"
+								name="confirmPassword"
 								children={(field) => {
 									const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+
 									return (
 										<Field data-invalid={isInvalid}>
-											<div className="grid grid-cols-2 gap-2">
-												<FieldLabel htmlFor={field.name}>Password</FieldLabel>
-												<Link to="/auth/forgot-password" className="underline underline-offset-4 text-right text-sm">
-													Forgot password?
-												</Link>
-											</div>
+											<FieldLabel htmlFor={field.name}>Confirm new password</FieldLabel>
 											<InputPassword
 												id={field.name}
 												name={field.name}
@@ -93,7 +89,7 @@ export default function LoginForm() {
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
 												aria-invalid={isInvalid}
-												autoComplete="current-password"
+												autoComplete="new-password"
 											/>
 											{isInvalid && <FieldError errors={field.state.meta.errors} />}
 										</Field>
@@ -110,30 +106,31 @@ export default function LoginForm() {
 										disabled={!canSubmit || !isDirty}
 										isLoading={isSubmitting}
 									>
-										Log in
-										<LogIn data-icon="inline-end" />
+										Reset password
+										<ShieldCheckIcon data-icon="inline-end" />
 									</SubmitButton>
 								)}
 							/>
 						</FieldGroup>
 					</form>
+				</FieldGroup>
+			</CardContent>
+		</Card>
+	)
+}
 
-					<FieldSeparator>or continue with</FieldSeparator>
-
-					<Button
-						type="button"
-						variant="outline"
-						className="w-full"
-						onClick={() => console.log("continue with google")}
-					>
-						<GoogleIcon className="size-4" />
-						Continue with Google
-					</Button>
-
+function InvalidLinkCard() {
+	return (
+		<Card className="w-full max-w-sm">
+			<CardHeader>
+				<CardTitle>{APP_NAME}</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<FieldGroup>
+					<p className="text-sm text-muted-foreground">This reset link is invalid or incomplete.</p>
 					<p className="text-center text-sm">
-						Don't have an account?{" "}
-						<Link to="/auth/register" className="underline underline-offset-4">
-							Create account
+						<Link to="/auth/forgot-password" className="underline underline-offset-4">
+							Request a new reset link
 						</Link>
 					</p>
 				</FieldGroup>

@@ -32,6 +32,10 @@ export default defineConfig({
 					// Empty, like local dev: exercises the host-only cookie path rather
 					// than pinning assertions to the prod `.yourdomain.com` value.
 					FREE_POS_COOKIE_DOMAIN: "",
+					// Tests use the capture sender (test/helpers/email.ts) instead of
+					// these — the key is deliberately empty, the from is a test address.
+					FREE_POS_EMAIL_API_KEY: "",
+					FREE_POS_EMAIL_FROM: "Free POS <no-reply@test.invalid>",
 				},
 			},
 		}),

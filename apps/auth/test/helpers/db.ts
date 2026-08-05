@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers"
-import { account, createDatabaseClient, session, user } from "@repo/database"
+import { account, createDatabaseClient, session, user, verification } from "@repo/database"
 import { eq, inArray } from "drizzle-orm"
 
 /**
@@ -42,4 +42,26 @@ export const findSessionsByUserId = async (userId: string) => {
 export const deleteTestUsersByEmail = async (emails: string[]) => {
 	if (emails.length === 0) return
 	await db.delete(user).where(inArray(user.email, emails))
+}
+
+/**
+ * `verification` has no FK to `user` — rows are keyed by the `identifier`
+ * string (the email), so deleting the `user` row does *not* remove them.
+ * Clean them up explicitly alongside `deleteTestUsersByEmail`.
+ */
+export const findVerificationsByIdentifier = async (identifier: string) => {
+	return db.select().from(verification).where(eq(verification.identifier, identifier))
+}
+
+export const deleteVerificationsByIdentifiers = async (identifiers: string[]) => {
+	if (identifiers.length === 0) return
+	await db.delete(verification).where(inArray(verification.identifier, identifiers))
+}
+
+/** Row-state setup for the expiry tests: push a row's `expiresAt` into the past. */
+export const expireVerification = async (id: string) => {
+	await db
+		.update(verification)
+		.set({ expiresAt: new Date(Date.now() - 1000) })
+		.where(eq(verification.id, id))
 }
