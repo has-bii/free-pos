@@ -35,9 +35,6 @@ export const getMyShopQueryOptions = () =>
 		staleTime: Infinity,
 	})
 
-export const isShopUnauthorizedError = (error: unknown): error is ShopApiError =>
-	error instanceof ShopApiError && error.status === 401
-
 export const cacheCreatedShop = (queryClient: QueryClient, shop: Shop) => {
 	queryClient.setQueryData(GET_MY_SHOP_QUERY_KEY, shop)
 	queryClient.setQueryData(ONBOARDING_COMPLETION_QUERY_KEY, true)

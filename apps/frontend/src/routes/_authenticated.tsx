@@ -1,4 +1,4 @@
-import AuthenticatedRouteError from "@repo/frontend/components/AuthenticatedRouteError"
+import RouteError from "@repo/frontend/components/RouteError"
 import OnboardingPending from "@repo/frontend/modules/shop/components/OnboardingPending"
 import {
 	consumeOnboardingCompletion,
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated")({
 		if (!onboardingPath) throw redirect({ to: "/onboarding/welcome", replace: true })
 	},
 	pendingComponent: OnboardingPending,
-	errorComponent: AuthenticatedRouteError,
+	errorComponent: RouteError,
 	component: AuthenticatedLayout,
 })
 

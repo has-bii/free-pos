@@ -1,32 +1,15 @@
-import { useAuth } from "@repo/frontend/modules/auth/context/AuthContext"
-import {
-	cacheCreatedShop,
-	isShopUnauthorizedError,
-	refetchMyShop,
-	type Shop,
-} from "@repo/frontend/modules/shop/queries/get-my-shop.query"
+import { cacheCreatedShop, refetchMyShop } from "@repo/frontend/modules/shop/queries/get-my-shop.query"
 import { shopSchema } from "@repo/frontend/modules/shop/schemas/shop.schema"
 import { useForm } from "@tanstack/react-form"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
 import { shopApi } from "../lib/api"
 
-const navigateToLogin = async (logout: () => Promise<void>, router: ReturnType<typeof useRouter>) => {
-	try {
-		await logout()
-	} catch {
-		// The login redirect is still the correct outcome if logout cannot reach the API.
-	} finally {
-		await router.navigate({ to: "/auth/login", replace: true })
-	}
-}
-
 const retryableFormError = "We couldn't create your shop right now. Check your connection and try again."
 
 export function useCreateShopForm() {
 	const queryClient = useQueryClient()
 	const router = useRouter()
-	const { logout } = useAuth()
 
 	return useForm({
 		defaultValues: {
@@ -45,22 +28,19 @@ export function useCreateShopForm() {
 
 				try {
 					const response = await shopApi.shops.$post({ json: payload })
-					const data = await response.json()
 
-					if (response.ok && "data" in data) {
-						const createdShop = (data as { data: { shop: Shop } }).data.shop
+					if (response.ok) {
+						const data = await response.json()
+						const createdShop = data.data.shop
 						cacheCreatedShop(queryClient, createdShop)
 						formApi.reset()
 						await router.navigate({ to: "/onboarding/complete", replace: true })
 						return
 					}
 
-					const status = response.status as number
+					const data = await response.json()
 
-					if (status === 401) {
-						await navigateToLogin(logout, router)
-						return
-					}
+					const status = response.status as number
 
 					if (status === 409 && data.message.toLowerCase().includes("already have a shop")) {
 						try {
@@ -71,12 +51,7 @@ export function useCreateShopForm() {
 								await router.navigate({ to: "/onboarding/complete", replace: true })
 								return
 							}
-						} catch (error) {
-							if (isShopUnauthorizedError(error)) {
-								await navigateToLogin(logout, router)
-								return
-							}
-
+						} catch {
 							return { form: retryableFormError }
 						}
 
@@ -96,12 +71,7 @@ export function useCreateShopForm() {
 					if ("error" in data) return { fields: data.error }
 
 					return { form: data.message }
-				} catch (error) {
-					if (isShopUnauthorizedError(error)) {
-						await navigateToLogin(logout, router)
-						return
-					}
-
+				} catch {
 					return { form: retryableFormError }
 				}
 			},
