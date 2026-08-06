@@ -19,7 +19,7 @@ export default function ResetPasswordForm() {
 }
 
 function ResetForm({ token, redirect }: { token: string; redirect: string }) {
-	const { form, tokenInvalid } = useResetPasswordForm(token, redirect)
+	const { form, tokenInvalid } = useResetPasswordForm(token)
 
 	// The submitted token turned out to be invalid/expired/consumed — the link
 	// is dead either way, so show the same dead-end-free state as a missing token.

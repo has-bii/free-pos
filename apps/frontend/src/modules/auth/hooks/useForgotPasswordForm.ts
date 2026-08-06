@@ -1,9 +1,11 @@
 import { forgotPasswordSchema } from "@repo/frontend/modules/auth/schemas/forgot-password.schema"
 import { useForm } from "@tanstack/react-form"
+import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { authApi } from "../lib/api"
 
 export function useForgotPasswordForm() {
+	const router = useRouter()
 	const [submitted, setSubmitted] = useState(false)
 
 	const form = useForm({
@@ -21,6 +23,10 @@ export function useForgotPasswordForm() {
 					// confirmation state".
 					if (res.ok) {
 						setSubmitted(true)
+						await router.navigate({
+							to: "/auth/success",
+							search: { type: "email-sent" },
+						})
 						return
 					}
 

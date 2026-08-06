@@ -18,6 +18,7 @@ import { Route as UnauthenticatedAuthForgotPasswordRouteImport } from './routes/
 import { Route as UnauthenticatedAuthLoginRouteImport } from './routes/_unauthenticated/auth/login'
 import { Route as UnauthenticatedAuthRegisterRouteImport } from './routes/_unauthenticated/auth/register'
 import { Route as UnauthenticatedAuthResetPasswordRouteImport } from './routes/_unauthenticated/auth/reset-password'
+import { Route as UnauthenticatedAuthSuccessRouteImport } from './routes/_unauthenticated/auth/success'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -67,6 +68,12 @@ const UnauthenticatedAuthResetPasswordRoute =
     path: '/reset-password',
     getParentRoute: () => UnauthenticatedAuthRoute,
   } as any)
+const UnauthenticatedAuthSuccessRoute =
+  UnauthenticatedAuthSuccessRouteImport.update({
+    id: '/success',
+    path: '/success',
+    getParentRoute: () => UnauthenticatedAuthRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof UnauthenticatedAuthLoginRoute
   '/auth/register': typeof UnauthenticatedAuthRegisterRoute
   '/auth/reset-password': typeof UnauthenticatedAuthResetPasswordRoute
+  '/auth/success': typeof UnauthenticatedAuthSuccessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof UnauthenticatedAuthLoginRoute
   '/auth/register': typeof UnauthenticatedAuthRegisterRoute
   '/auth/reset-password': typeof UnauthenticatedAuthResetPasswordRoute
+  '/auth/success': typeof UnauthenticatedAuthSuccessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,6 +106,7 @@ export interface FileRoutesById {
   '/_unauthenticated/auth/login': typeof UnauthenticatedAuthLoginRoute
   '/_unauthenticated/auth/register': typeof UnauthenticatedAuthRegisterRoute
   '/_unauthenticated/auth/reset-password': typeof UnauthenticatedAuthResetPasswordRoute
+  '/_unauthenticated/auth/success': typeof UnauthenticatedAuthSuccessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/auth/reset-password'
+    | '/auth/success'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/auth/reset-password'
+    | '/auth/success'
   id:
     | '__root__'
     | '/_authenticated'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_unauthenticated/auth/login'
     | '/_unauthenticated/auth/register'
     | '/_unauthenticated/auth/reset-password'
+    | '/_unauthenticated/auth/success'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnauthenticatedAuthResetPasswordRouteImport
       parentRoute: typeof UnauthenticatedAuthRoute
     }
+    '/_unauthenticated/auth/success': {
+      id: '/_unauthenticated/auth/success'
+      path: '/success'
+      fullPath: '/auth/success'
+      preLoaderRoute: typeof UnauthenticatedAuthSuccessRouteImport
+      parentRoute: typeof UnauthenticatedAuthRoute
+    }
   }
 }
 
@@ -221,6 +241,7 @@ interface UnauthenticatedAuthRouteChildren {
   UnauthenticatedAuthLoginRoute: typeof UnauthenticatedAuthLoginRoute
   UnauthenticatedAuthRegisterRoute: typeof UnauthenticatedAuthRegisterRoute
   UnauthenticatedAuthResetPasswordRoute: typeof UnauthenticatedAuthResetPasswordRoute
+  UnauthenticatedAuthSuccessRoute: typeof UnauthenticatedAuthSuccessRoute
 }
 
 const UnauthenticatedAuthRouteChildren: UnauthenticatedAuthRouteChildren = {
@@ -230,6 +251,7 @@ const UnauthenticatedAuthRouteChildren: UnauthenticatedAuthRouteChildren = {
   UnauthenticatedAuthLoginRoute: UnauthenticatedAuthLoginRoute,
   UnauthenticatedAuthRegisterRoute: UnauthenticatedAuthRegisterRoute,
   UnauthenticatedAuthResetPasswordRoute: UnauthenticatedAuthResetPasswordRoute,
+  UnauthenticatedAuthSuccessRoute: UnauthenticatedAuthSuccessRoute,
 }
 
 const UnauthenticatedAuthRouteWithChildren =
