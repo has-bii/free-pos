@@ -1,4 +1,3 @@
-import { GoogleAccountConflictError } from "@repo/auth/errors"
 import type { DatabaseExecutor } from "@repo/auth/factory"
 import { account } from "@repo/database"
 import { and, eq } from "drizzle-orm"
@@ -29,17 +28,18 @@ export const AccountRepository = {
 	},
 
 	/**
-	 * Link an OAuth identity while translating the provider/account unique
-	 * constraint at the repository boundary. The callback can then re-read the
-	 * row and safely handle two callbacks racing to create the same link.
+	 * Link an OAuth identity while normalizing the provider/account unique
+	 * constraint into a false result. The service can then re-read the row and
+	 * safely handle two callbacks racing to create the same link.
 	 */
 	linkGoogle: async (db: DatabaseExecutor, userId: string, accountId: string) => {
 		try {
 			await db.insert(account).values({ userId, accountId, providerId: "google", password: null })
 		} catch (err) {
-			if (isDuplicateEntryError(err)) throw new GoogleAccountConflictError()
+			if (isDuplicateEntryError(err)) return false
 			throw err
 		}
+		return true
 	},
 
 	insert: async (db: DatabaseExecutor, payload: typeof account.$inferInsert) => {

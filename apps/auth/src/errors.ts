@@ -4,11 +4,3 @@ export class EmailAlreadyExistsError extends Error {
 		this.name = "EmailAlreadyExistsError"
 	}
 }
-
-/** The same Google identity was claimed by another local user. */
-export class GoogleAccountConflictError extends Error {
-	constructor() {
-		super("Google account is already linked to another user")
-		this.name = "GoogleAccountConflictError"
-	}
-}
