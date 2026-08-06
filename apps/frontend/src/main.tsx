@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 
 const router = createRouter({
 	routeTree,
-	context: { queryClient, auth: { isLoading: true, isAuthenticated: false } },
+	context: { queryClient, auth: { isLoading: true, isAuthenticated: false, logout: async () => {} } },
 })
 
 function AppRouter() {

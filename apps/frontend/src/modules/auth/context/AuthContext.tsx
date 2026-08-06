@@ -1,22 +1,36 @@
 import { APP_NAME } from "@repo/frontend/lib/config"
 import { getMeQueryOption } from "@repo/frontend/modules/auth/queries/get-me.query"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { LoaderCircle } from "lucide-react"
 import type { PropsWithChildren } from "react"
 import { createContext, useContext } from "react"
+import { authApi } from "../lib/api"
 
 export interface AuthContextType {
 	isLoading: boolean
 	isAuthenticated: boolean
+	logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: PropsWithChildren) {
 	const meQuery = useQuery(getMeQueryOption())
+	const queryClient = useQueryClient()
+
+	const logout = async () => {
+		try {
+			await authApi.logout.$post()
+		} finally {
+			queryClient.clear()
+			await meQuery.refetch()
+		}
+	}
+
 	const auth: AuthContextType = {
 		isLoading: meQuery.isPending,
 		isAuthenticated: Boolean(meQuery.data),
+		logout,
 	}
 
 	if (auth.isLoading) {
