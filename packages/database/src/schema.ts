@@ -13,6 +13,25 @@ export const user = mysqlTable("user", {
 	updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 })
 
+export const shop = mysqlTable(
+	"shop",
+	{
+		id: varchar("id", { length: 36 })
+			.primaryKey()
+			.$defaultFn(() => uuidv7()),
+		ownerUserId: varchar("owner_id", { length: 36 })
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		name: varchar("name", { length: 255 }).notNull(),
+		slug: varchar("slug", { length: 64 }).notNull(),
+		description: text("description"),
+		address: text("address"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+	},
+	(table) => [uniqueIndex("shop_owner_unique").on(table.ownerUserId), uniqueIndex("shop_slug_unique").on(table.slug)],
+)
+
 export const session = mysqlTable("session", {
 	id: varchar("id", { length: 36 })
 		.primaryKey()

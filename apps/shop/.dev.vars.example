@@ -1,0 +1,3 @@
+FREE_POS_DATABASE_URL="mysql://user:password@host:4000/free_pos"
+FREE_POS_JWT_SECRET="replace-with-a-long-random-secret"
+FREE_POS_FRONTEND_ORIGIN="http://localhost:5173"

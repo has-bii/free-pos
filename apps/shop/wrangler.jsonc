@@ -1,0 +1,10 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "free-pos-shop",
+	"main": "src/index.ts",
+	"minify": true,
+	"compatibility_date": "2026-08-02",
+	"compatibility_flags": ["nodejs_compat_v2"],
+	"observability": { "enabled": true },
+	"dev": { "port": 8788 }
+}

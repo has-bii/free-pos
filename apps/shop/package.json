@@ -1,0 +1,32 @@
+{
+	"name": "@repo/shop",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@hono/valibot-validator": "catalog:",
+		"@repo/auth-kit": "workspace:*",
+		"@repo/database": "workspace:*",
+		"drizzle-orm": "catalog:",
+		"hono": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "catalog:",
+		"@repo/typescript-config": "workspace:*",
+		"@tsndr/cloudflare-worker-jwt": "catalog:",
+		"@types/node": "catalog:",
+		"dotenv": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"wrangler": "catalog:"
+	}
+}

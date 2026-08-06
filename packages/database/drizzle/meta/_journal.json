@@ -15,6 +15,13 @@
 			"when": 1785922144691,
 			"tag": "0001_spicy_giant_girl",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "5",
+			"when": 1786015425681,
+			"tag": "0002_fancy_vermin",
+			"breakpoints": true
 		}
 	]
 }
