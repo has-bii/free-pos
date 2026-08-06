@@ -28,7 +28,7 @@ const isSuccessType = (type: string | undefined): type is SuccessType =>
 	type !== undefined && Object.hasOwn(successContent, type)
 
 export const Route = createFileRoute("/_unauthenticated/auth/success")({
-	validateSearch: v.parser(successSearchSchema),
+	validateSearch: successSearchSchema,
 	component: SuccessPage,
 })
 

@@ -45,7 +45,7 @@ const isErrorCode = (code: string | undefined): code is ErrorCode =>
 	code !== undefined && Object.hasOwn(errorContent, code)
 
 export const Route = createFileRoute("/_unauthenticated/auth/error")({
-	validateSearch: v.parser(errorSearchSchema),
+	validateSearch: errorSearchSchema,
 	component: ErrorPage,
 })
 
