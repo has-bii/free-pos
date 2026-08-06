@@ -4,12 +4,12 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import react, { reactCompilerPreset } from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
-// tsc resolves `@repo/frontend/*` and `@repo/ui/*` from tsconfig `paths`,
-// but Vite does not read those. Mirror both mappings here; keep them in
-// sync with tsconfig.json.
+// tsc resolves the workspace source aliases from tsconfig `paths`, but Vite
+// does not read those. Mirror the mappings here; keep both files in sync.
 const srcDir = `${import.meta.dirname}/src/`
 const uiSrcDir = `${import.meta.dirname}/../../packages/ui/src/`
 const authSrcDir = `${import.meta.dirname}/../auth/src/`
+const shopSrcDir = `${import.meta.dirname}/../shop/src/`
 
 export default defineConfig({
 	plugins: [
@@ -23,6 +23,7 @@ export default defineConfig({
 			{ find: /^@repo\/frontend\//, replacement: srcDir },
 			{ find: /^@repo\/ui\//, replacement: uiSrcDir },
 			{ find: /^@repo\/auth\//, replacement: authSrcDir },
+			{ find: /^@repo\/shop\//, replacement: shopSrcDir },
 		],
 	},
 })

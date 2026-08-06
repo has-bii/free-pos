@@ -28,8 +28,8 @@ Run these from `apps/auth/`, or from the repo root with `pnpm --filter @repo/aut
 
 Copy `.dev.vars.example` to `.dev.vars` and fill in:
 - `FREE_POS_DATABASE_URL` — TiDB connection string (see `packages/database/.env.example` for the required format/ssl param)
-- `FREE_POS_JWT_SECRET` — HS256 signing secret
-- `FREE_POS_FRONTEND_ORIGIN` — exact-match origin allowed by CORS (e.g. the frontend's local dev URL); required in every environment
+- `FREE_POS_JWT_SECRET` — HS256 signing secret; it must be byte-for-byte identical on every Worker that verifies auth tokens, including `apps/shop`
+- `FREE_POS_FRONTEND_ORIGIN` — exact-match origin allowed by CORS (e.g. `http://localhost:5173` locally); required and identical on every browser-facing service
 - `FREE_POS_COOKIE_DOMAIN` — access-token cookie `Domain`. Leave empty in `.dev.vars` (host-only cookie, matching how the shared `yourdomain.com` registrable domain doesn't exist locally); set to `.yourdomain.com` in prod via `wrangler secret put FREE_POS_COOKIE_DOMAIN`
 - `FREE_POS_EMAIL_API_KEY` — Resend API key for password-reset email delivery. Empty/absent in local dev → `lib/email.ts` console-logs the would-be email (wrangler dev prints the clickable reset link); set in prod via `wrangler secret put FREE_POS_EMAIL_API_KEY`
 - `FREE_POS_EMAIL_FROM` — Resend `from` address (e.g. `Free POS <no-reply@yourdomain.com>`); the code falls back to that default when unset. The sending domain must be verified in the Resend dashboard

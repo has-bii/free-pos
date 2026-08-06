@@ -6,8 +6,14 @@
 			"@repo/frontend/*": ["./src/*"],
 			"@repo/ui/*": ["../../packages/ui/src/*"],
 			"@repo/auth/*": ["../auth/src/*"],
-			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"]
+			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"],
+			"@repo/shop/*": ["../shop/src/*"]
 		}
 	},
-	"include": ["src", "vite.config.ts", "../auth/worker-configuration.d.ts"]
+	"include": [
+		"src",
+		"vite.config.ts",
+		"../auth/worker-configuration.d.ts",
+		"../shop/worker-configuration.d.ts"
+	]
 }

@@ -1,6 +1,7 @@
 FREE_POS_DATABASE_URL=mysql://user:password@host:4000/database
+# Must be identical in every Worker that verifies auth tokens, including apps/shop.
 FREE_POS_JWT_SECRET=change-me
-FREE_POS_FRONTEND_ORIGIN=http://localhost:3000
+FREE_POS_FRONTEND_ORIGIN=http://localhost:5173
 # Left unset on purpose: an empty override makes the access-token cookie
 # host-only in local dev, overriding the prod secret value (.yourdomain.com).
 FREE_POS_COOKIE_DOMAIN=

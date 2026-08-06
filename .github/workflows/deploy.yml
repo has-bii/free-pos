@@ -81,6 +81,7 @@ jobs:
         run: pnpm turbo run build --filter=@repo/frontend
         env:
           VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
+          VITE_SHOP_API_URL: ${{ secrets.VITE_SHOP_API_URL }}
           VITE_APP_NAME: ${{ vars.VITE_APP_NAME }}
 
       - name: Deploy frontend to Cloudflare Workers
