@@ -20,7 +20,8 @@ const queryClient = new QueryClient({
 
 const router = createRouter({
 	routeTree,
-	context: { queryClient, auth: undefined },
+	// biome-ignore lint/style/noNonNullAssertion: router context.auth automatically defined, check AppRouter below
+	context: { queryClient, auth: undefined! },
 })
 
 function AppRouter() {
