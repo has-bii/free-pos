@@ -1,8 +1,14 @@
+import { GET_ME_QUERY_KEY } from "@repo/frontend/modules/auth/queries/get-me.query"
 import { registerSchema } from "@repo/frontend/modules/auth/schemas/register.schema"
 import { useForm } from "@tanstack/react-form"
+import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "@tanstack/react-router"
 import { authApi } from "../lib/api"
 
-export function useRegisterForm() {
+export function useRegisterForm(redirect = "/") {
+	const queryClient = useQueryClient()
+	const router = useRouter()
+
 	return useForm({
 		defaultValues: {
 			name: "",
@@ -16,11 +22,12 @@ export function useRegisterForm() {
 				try {
 					const { name, email, password } = value
 					const res = await authApi.register.email.$post({ json: { name, email, password } })
-					formApi.reset()
 
 					if (res.ok) {
-						const data = await res.json()
-						console.log(data.message)
+						await res.json()
+						formApi.reset()
+						await queryClient.refetchQueries({ queryKey: GET_ME_QUERY_KEY })
+						await router.navigate({ to: redirect })
 						return
 					}
 

@@ -13,7 +13,7 @@ const messages: Record<string, string> = {
 }
 
 export default function GoogleOAuthError() {
-	const { code } = useSearch({ from: "/auth/error" })
+	const { code } = useSearch({ from: "/_unauthenticated/auth/error" })
 	const message =
 		code && Object.hasOwn(messages, code) ? messages[code] : "Google sign-in could not be completed. Please try again."
 

@@ -12,10 +12,10 @@ import { Link, useSearch } from "@tanstack/react-router"
 import { AlertCircleIcon, CheckCircle2Icon, LogIn } from "lucide-react"
 
 export default function LoginForm() {
-	const form = useLoginForm()
-	// Set by the reset-password page after a successful reset
-	// (navigate({ to: "/auth/login", search: { reset: "success" } })).
-	const { reset } = useSearch({ from: "/auth/login" })
+	// Set by the reset-password page after a successful reset. `redirect` has
+	// already been normalized by the login route's search schema.
+	const { reset, redirect } = useSearch({ from: "/_unauthenticated/auth/login" })
+	const form = useLoginForm(redirect)
 
 	return (
 		<Card className="w-full max-w-sm">
@@ -83,7 +83,11 @@ export default function LoginForm() {
 										<Field data-invalid={isInvalid}>
 											<div className="grid grid-cols-2 gap-2">
 												<FieldLabel htmlFor={field.name}>Password</FieldLabel>
-												<Link to="/auth/forgot-password" className="underline underline-offset-4 text-right text-sm">
+												<Link
+													to="/auth/forgot-password"
+													search={redirect ? { redirect } : {}}
+													className="underline underline-offset-4 text-right text-sm"
+												>
 													Forgot password?
 												</Link>
 											</div>
@@ -125,7 +129,9 @@ export default function LoginForm() {
 						type="button"
 						variant="outline"
 						className="w-full"
-						onClick={() => window.location.assign(`${AUTH_API_URL}/login/google?returnTo=${encodeURIComponent("/")}`)}
+						onClick={() =>
+							window.location.assign(`${AUTH_API_URL}/login/google?returnTo=${encodeURIComponent(redirect ?? "/")}`)
+						}
 					>
 						<GoogleIcon className="size-4" />
 						Continue with Google
@@ -133,7 +139,7 @@ export default function LoginForm() {
 
 					<p className="text-center text-sm">
 						Don't have an account?{" "}
-						<Link to="/auth/register" className="underline underline-offset-4">
+						<Link to="/auth/register" search={redirect ? { redirect } : {}} className="underline underline-offset-4">
 							Create account
 						</Link>
 					</p>

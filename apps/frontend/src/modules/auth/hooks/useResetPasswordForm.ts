@@ -6,7 +6,7 @@ import { authApi } from "../lib/api"
 
 const INVALID_TOKEN_MESSAGE = "Invalid or expired reset token."
 
-export function useResetPasswordForm(token: string) {
+export function useResetPasswordForm(token: string, redirect = "/") {
 	const router = useRouter()
 	const [tokenInvalid, setTokenInvalid] = useState(false)
 
@@ -26,7 +26,10 @@ export function useResetPasswordForm(token: string) {
 					const res = await authApi.recovery["reset-password"].$post({ json: { token, password } })
 
 					if (res.ok) {
-						router.navigate({ to: "/auth/login", search: { reset: "success" } })
+						router.navigate({
+							to: "/auth/login",
+							search: { reset: "success", redirect },
+						})
 						return
 					}
 

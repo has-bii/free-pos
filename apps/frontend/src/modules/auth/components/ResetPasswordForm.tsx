@@ -9,20 +9,21 @@ import { Link, useSearch } from "@tanstack/react-router"
 import { AlertCircleIcon, ShieldCheckIcon } from "lucide-react"
 
 export default function ResetPasswordForm() {
-	const { token } = useSearch({ from: "/auth/reset-password" })
+	const { token, redirect } = useSearch({ from: "/_unauthenticated/auth/reset-password" })
+	const safeRedirect = redirect ?? "/"
 
 	// No token in the URL — the link is incomplete or was stripped of its query.
-	if (!token) return <InvalidLinkCard />
+	if (!token) return <InvalidLinkCard redirect={safeRedirect} />
 
-	return <ResetForm token={token} />
+	return <ResetForm token={token} redirect={safeRedirect} />
 }
 
-function ResetForm({ token }: { token: string }) {
-	const { form, tokenInvalid } = useResetPasswordForm(token)
+function ResetForm({ token, redirect }: { token: string; redirect: string }) {
+	const { form, tokenInvalid } = useResetPasswordForm(token, redirect)
 
 	// The submitted token turned out to be invalid/expired/consumed — the link
 	// is dead either way, so show the same dead-end-free state as a missing token.
-	if (tokenInvalid) return <InvalidLinkCard />
+	if (tokenInvalid) return <InvalidLinkCard redirect={redirect} />
 
 	return (
 		<Card className="w-full max-w-sm">
@@ -119,7 +120,7 @@ function ResetForm({ token }: { token: string }) {
 	)
 }
 
-function InvalidLinkCard() {
+function InvalidLinkCard({ redirect }: { redirect: string }) {
 	return (
 		<Card className="w-full max-w-sm">
 			<CardHeader>
@@ -129,7 +130,11 @@ function InvalidLinkCard() {
 				<FieldGroup>
 					<p className="text-sm text-muted-foreground">This reset link is invalid or incomplete.</p>
 					<p className="text-center text-sm">
-						<Link to="/auth/forgot-password" className="underline underline-offset-4">
+						<Link
+							to="/auth/forgot-password"
+							search={redirect ? { redirect } : {}}
+							className="underline underline-offset-4"
+						>
 							Request a new reset link
 						</Link>
 					</p>

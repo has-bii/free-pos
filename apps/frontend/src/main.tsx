@@ -1,14 +1,33 @@
 import "@repo/ui/styles/globals.css"
 
+import { AuthProvider, useAuth } from "@repo/frontend/modules/auth/context/AuthContext"
 import { routeTree } from "@repo/frontend/routeTree.gen"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			retry: 0,
+		},
+		mutations: {
+			retry: 0,
+		},
+	},
+})
 
-const router = createRouter({ routeTree, context: { queryClient } })
+const router = createRouter({
+	routeTree,
+	context: { queryClient, auth: { isLoading: true, isAuthenticated: false } },
+})
+
+function AppRouter() {
+	const auth = useAuth()
+
+	return <RouterProvider router={router} context={{ queryClient, auth }} />
+}
 
 declare module "@tanstack/react-router" {
 	interface Register {
@@ -24,7 +43,9 @@ if (!rootElement) {
 createRoot(rootElement).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
-			<RouterProvider router={router} />
+			<AuthProvider>
+				<AppRouter />
+			</AuthProvider>
 		</QueryClientProvider>
 	</StrictMode>,
 )

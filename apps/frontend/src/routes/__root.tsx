@@ -1,8 +1,10 @@
+import type { AuthContextType } from "@repo/frontend/modules/auth/context/AuthContext"
 import type { QueryClient } from "@tanstack/react-query"
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router"
 
 interface RouterContext {
 	queryClient: QueryClient
+	auth: AuthContextType
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
