@@ -40,7 +40,7 @@ flowchart LR
 ```
 
 **Apps**
-- `apps/auth` — Hono API on Cloudflare Workers. Email/password auth (register, login, refresh, `/me`), HS256 JWTs delivered as `httpOnly` cookies.
+- `apps/auth` — Hono API on Cloudflare Workers. Email/password and Google OAuth authentication (register, login, refresh, `/me`), with HS256 JWTs delivered as `httpOnly` cookies.
 - `apps/frontend` — Vite + React 19 + TanStack Router SPA, deployed as a static-assets Worker. No SSR, no server component.
 
 **Shared packages**
@@ -51,13 +51,19 @@ flowchart LR
 
 ## Roadmap
 
-- [x] Email/password auth (register, login, refresh, `/me`) with HS256 JWTs in `httpOnly` cookies
+- [x] Email/password and Google OAuth auth (register, login, refresh, `/me`) with HS256 JWTs in `httpOnly` cookies
 - [x] Login page UI (`apps/frontend`)
 - [ ] Menu & item management
 - [ ] Table management
 - [ ] Order taking / kitchen tickets
 - [ ] Checkout & payments
 - [ ] Sales reporting
+
+## Documentation
+
+- [Backend application conventions](./docs/conventions/backend.md) — structure and layering rules for backend apps.
+- [`CLAUDE.md`](./CLAUDE.md) — repository architecture, commands, and contribution guidance.
+- [`apps/auth/CLAUDE.md`](./apps/auth/CLAUDE.md) — authentication service setup, architecture, and testing.
 
 ## Getting Started
 
