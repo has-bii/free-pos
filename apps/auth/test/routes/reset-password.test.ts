@@ -10,6 +10,7 @@ import {
 	findVerificationsByIdentifier,
 } from "../helpers/db"
 import { capturedEmails, installEmailCapture, resetEmailCapture } from "../helpers/email"
+import { registerGoogleUser } from "../helpers/google"
 import {
 	type MessageBody,
 	postJson,
@@ -83,7 +84,30 @@ describe("POST /recovery/reset-password", () => {
 		expect(await findVerificationsByIdentifier(user.email)).toHaveLength(0)
 	})
 
-	// Case 2
+	// Case 2 — OAuth-only users receive a credential account on reset.
+	it("creates a credential account when the user has no password account", async () => {
+		const email = track(uniqueEmail())
+		await registerGoogleUser(email)
+		const token = await requestResetToken(email)
+
+		const res = await postJson(PATH, { token, password: NEW_PASSWORD })
+		expect(res.status).toBe(200)
+
+		const user = await findUserByEmail(email)
+		expect(user).not.toBeNull()
+		if (!user) throw new Error("expected the Google user to exist")
+
+		const accounts = await findAccountsByUserId(user.id)
+		expect(accounts).toHaveLength(2)
+		const credential = accounts.find((account) => account.providerId === "credential")
+		expect(credential?.accountId).toBe(user.id)
+		expect(credential?.password).toEqual(expect.any(String))
+		expect(await Password.verifyPassword(NEW_PASSWORD, credential?.password as string)).toBe(true)
+
+		expect((await postJson("/login/email", { email, password: NEW_PASSWORD })).status).toBe(200)
+	})
+
+	// Case 3
 	it("rejects a replay of the same token", async () => {
 		const user = await registerUser({ email: track(uniqueEmail()) })
 		const token = await requestResetToken(user.email)

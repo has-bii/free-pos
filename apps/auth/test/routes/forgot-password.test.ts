@@ -7,6 +7,7 @@ import {
 	findVerificationsByIdentifier,
 } from "../helpers/db"
 import { capturedEmails, installEmailCapture, resetEmailCapture } from "../helpers/email"
+import { registerGoogleUser } from "../helpers/google"
 import {
 	type MessageBody,
 	postJson,
@@ -87,7 +88,20 @@ describe("POST /recovery/forgot-password", () => {
 		expect(login.status).toBe(200)
 	})
 
-	// Case 3 — anti-enumeration: identical 200, no email, no row.
+	// Case 3 — OAuth-only users can add a password through recovery.
+	it("sends a reset link to a user without a credential account", async () => {
+		const email = track(uniqueEmail())
+		await registerGoogleUser(email)
+
+		const res = await postJson(PATH, { email })
+		expect(res.status).toBe(200)
+		expect((await readJson<MessageBody>(res)).message).toBe(GENERIC_MESSAGE)
+		expect(await findVerificationsByIdentifier(email)).toHaveLength(1)
+		expect(capturedEmails).toHaveLength(1)
+		expect(capturedEmails[0]?.to).toBe(email)
+	})
+
+	// Case 4 — anti-enumeration: identical 200, no email, no row.
 	it("returns the generic message for an unknown email without sending or storing anything", async () => {
 		const email = uniqueEmail()
 

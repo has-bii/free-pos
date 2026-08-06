@@ -46,10 +46,18 @@ export const AccountRepository = {
 		await db.insert(account).values(payload)
 	},
 
-	updatePasswordByUserId: async (db: DatabaseExecutor, userId: string, passwordHash: string) => {
-		await db
-			.update(account)
-			.set({ password: passwordHash })
-			.where(and(eq(account.userId, userId), eq(account.providerId, "credential")))
+	upsertCredentialPassword: async (db: DatabaseExecutor, userId: string, passwordHash: string) => {
+		const credentialAccount = await AccountRepository.findCredentialByUserId(db, userId)
+		if (credentialAccount) {
+			await db.update(account).set({ password: passwordHash }).where(eq(account.id, credentialAccount.id))
+			return
+		}
+
+		await db.insert(account).values({
+			userId,
+			accountId: userId,
+			providerId: "credential",
+			password: passwordHash,
+		})
 	},
 }

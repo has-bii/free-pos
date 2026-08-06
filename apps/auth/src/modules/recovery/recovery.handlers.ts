@@ -25,14 +25,6 @@ export const forgotPasswordHandlers = factory.createHandlers(validate("json", fo
 		return c.json({ message: GENERIC_MESSAGE })
 	}
 
-	// No credential account (e.g. a future OAuth-only user): nothing to reset,
-	// sending a link would be noise. Same silent 200.
-	const credentialAccount = await AccountRepository.findCredentialByUserId(db, foundUser.id)
-	if (!credentialAccount?.password) {
-		console.log(`reset requested for user without a password: ${email}`)
-		return c.json({ message: GENERIC_MESSAGE })
-	}
-
 	// Cooldown: a live link is still valid — no re-send, no rotate.
 	const existing = await VerificationRepository.findLiveByIdentifier(db, email)
 	if (existing) {
@@ -89,7 +81,9 @@ export const resetPasswordHandlers = factory.createHandlers(validate("json", res
 		if (!foundUser) return { ok: false } as const
 
 		const passwordHash = await Password.hashPassword(password)
-		await AccountRepository.updatePasswordByUserId(tx, foundUser.id, passwordHash)
+		// A user may have been created through OAuth and not have a credential
+		// account yet. Resetting the password provisions that account.
+		await AccountRepository.upsertCredentialPassword(tx, foundUser.id, passwordHash)
 		// Possession of the mailbox is proof enough: a successful reset
 		// verifies the email.
 		await UserRepository.markEmailVerified(tx, foundUser.id)

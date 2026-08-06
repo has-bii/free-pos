@@ -6,7 +6,7 @@ See the root `CLAUDE.md` first for monorepo-wide commands and conventions. This 
 
 ## What this is
 
-`@repo/auth` (Worker name `free-pos-auth`): a Cloudflare Workers service built on Hono, providing email/password authentication (register, login, refresh, `/me`) plus a `/health` DB check. Deployed from the `production` branch (see `.github/workflows/deploy.yml`).
+`@repo/auth` (Worker name `free-pos-auth`): a Cloudflare Workers service built on Hono, providing email/password authentication (register, login, password recovery, refresh, `/me`) plus a `/health` DB check. Deployed from the `production` branch (see `.github/workflows/deploy.yml`).
 
 Access and refresh tokens are HS256 JWTs delivered as `httpOnly` cookies (never in a JSON response body) — signing/verification, the `requireAuth` middleware, and the cookie helpers live in `@repo/auth-kit` (`../../packages/auth-kit`), which this app depends on rather than reimplementing. See that package's own `CLAUDE.md` for what's in it.
 
@@ -43,7 +43,7 @@ The database, JWT, frontend-origin, cookie-domain, email, and Google bindings ar
 
 ## Testing
 
-`test/` holds HTTP route tests that run the real Worker in workerd (`@cloudflare/vitest-pool-workers`) against a **real TiDB database**. There are no unit tests and no mocks — requests go through the Worker's real entry point via the loopback binding, exercising the whole middleware chain, and assertions check the response *and* the rows that were written.
+`test/` holds HTTP route tests that run the real Worker in workerd (`@cloudflare/vitest-pool-workers`) against a **real TiDB database**. There are no unit tests — requests go through the Worker's real entry point via the loopback binding, exercising the whole middleware chain, and assertions check the response *and* the rows that were written. Network-facing boundaries such as email delivery and Google are replaced only to keep the route tests deterministic and offline.
 
 Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `test/helpers/http.ts`. The `SELF` and `env` exports from `cloudflare:test` do the same thing but are deprecated as of `@cloudflare/vitest-pool-workers@0.20.1` — don't reintroduce them.
 
@@ -53,13 +53,13 @@ Use `exports.default.fetch()` and `env` from `cloudflare:workers`, wrapped by `t
 2. Apply migrations to it: point `DATABASE_URL` in `packages/database/.env` at the new database and run `pnpm --filter @repo/database db:migrate`. Test runs never perform DDL, so this is manual — after adding a migration, re-run it or `test/setup.ts`'s drift guard refuses to start the suite (see Known limits).
 3. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL` to that same connection string.
 
-`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). It also hardcodes `FREE_POS_EMAIL_API_KEY` (empty), `FREE_POS_EMAIL_FROM`, and deterministic Google OAuth bindings — but tests never call Google: route tests replace the `googleProvider` boundary with controlled responses. These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
+`vitest.config.ts` injects `TEST_DATABASE_URL` as the Worker's `FREE_POS_DATABASE_URL` binding and hardcodes `FREE_POS_JWT_SECRET` (tests hand-sign an expired token, so they need the key), `FREE_POS_FRONTEND_ORIGIN`, and `FREE_POS_COOKIE_DOMAIN` (empty, exercising the host-only path). It also hardcodes `FREE_POS_EMAIL_API_KEY` (empty), `FREE_POS_EMAIL_FROM`, and deterministic Google OAuth bindings. The OAuth-only recovery tests exercise the real Google callback route through `test/helpers/google.ts`, replacing only the `googleProvider` boundary so no network request is made. These `miniflare.bindings` override `.dev.vars`, so a test run never touches your dev database.
 
 ### Writing tests
 
 - **Every test mints its own email**: `` const email = `t-${crypto.randomUUID()}@test.invalid` `` via `uniqueEmail()`. Nothing is truncated between tests and files run in parallel, so a hardcoded address is a latent flake — reject it in review.
 - Track every email you create and delete it in `afterAll` with `deleteTestUsersByEmail`. Deleting the `user` row cascades to `account` and `session`.
-- Seed fixtures through `registerUser()` (which calls the real `POST /register/email`), never by inserting rows. `test/helpers/db.ts` is for teardown and assertions only.
+- Seed normal fixtures through `registerUser()` (which calls the real `POST /register/email`) and OAuth-only fixtures through `registerGoogleUser()` (which calls the real Google callback route), never by inserting rows. `test/helpers/db.ts` is for teardown and assertions only.
 - Registering costs a real 50,000-iteration PBKDF2 hash plus TiDB round-trips, so share one fixture per file via `beforeAll` where the test doesn't need a fresh user. Timeouts are raised to 20s for this reason.
 - If a run is killed mid-suite, `t-*@test.invalid` rows survive. Harmless; clear them with `DELETE FROM user WHERE email LIKE 't-%@test.invalid'`.
 - **Tokens live in cookies, not the response body or `Authorization` header.** `test/helpers/http.ts`'s `CookieJar`/`TestClient` stand in for a browser: `registerUser()` returns a `client` (a `TestClient`) that already carries the `Set-Cookie` cookies from registration, and `client.get`/`client.post`/`client.postJson` replay whatever cookies in its jar apply to the request path — including respecting the refresh cookie's `Path=/refresh` scoping, so a `client.post("/refresh")` attaches it automatically while a `client.get("/me")` does not. Grab a raw cookie value with `client.jar.get(ACCESS_TOKEN_COOKIE_NAME)` (from `@repo/auth-kit/cookies`) when a test needs to replay it manually — e.g. via the stateless `get`/`post` + `cookieHeader(name, value)` helpers — to hand-craft a forged/expired/garbage token, or to prove a token remains valid after the cookie instructing the browser to drop it has been cleared (see `logout.test.ts`'s idempotency case).
@@ -108,6 +108,7 @@ Plain object literals of async methods (`export const X = { ... }`) that are the
 - Sessions are rows in the `session` table keyed by a `uuidv7` `id` that is the stable session identity and never changes. `token` is a separate `uuidv7`, the rotating credential embedded as the refresh JWT's `jti`; `id` is embedded as `sid` in both tokens. `POST /refresh` (`modules/refresh/`) reads the presented refresh token from its cookie (no JSON body — there's no `refresh.schema.ts`), verifies it, then `SessionRepository.rotateToken` does a compare-and-swap on `token` (matching on the old value, writing a new `token` + `expiresAt`) so a replayed/stale refresh token fails closed — see the comments in `src/lib/session.ts` and `session.repository.ts` for the invariants this depends on.
 - `requireAuth` (`@repo/auth-kit/middleware/auth`) reads the access token from its cookie and sets `c.var.userId`/`c.var.sessionId`; it does not touch the DB. Handlers needing the full user row still look it up via `UserRepository.findById`.
 - `requestMeta(c)` (`src/lib/request.ts`) extracts `CF-Connecting-IP` / `User-Agent` for session metadata.
+- Password recovery uses `POST /recovery/forgot-password` and `POST /recovery/reset-password`. For any existing user, including an OAuth-only user without a `providerId: "credential"` account, forgot-password creates a single-use verification token and sends the reset email. A live token acts as a cooldown; unknown emails still receive the same generic response without a token or email. Reset validates and consumes the token in a transaction, upserts the credential account with the new PBKDF2 password hash, marks the email verified, and creates no session or cookies.
 
 ## Known limitations (see `docs/prd/httponly-cookie-auth.md`)
 

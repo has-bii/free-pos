@@ -148,6 +148,10 @@ export class TestClient {
 		return res
 	}
 
+	request(path: string, init: RequestInit = {}): Promise<Response> {
+		return this.send(path, init)
+	}
+
 	get(path: string, headers?: HeadersInit): Promise<Response> {
 		return this.send(path, headers ? { headers } : {})
 	}
