@@ -22,10 +22,10 @@ export function useRegisterForm(redirect = "/") {
 				try {
 					const { name, email, password } = value
 					const res = await authApi.register.email.$post({ json: { name, email, password } })
+					formApi.reset()
 
 					if (res.ok) {
 						await res.json()
-						formApi.reset()
 						await queryClient.refetchQueries({ queryKey: GET_ME_QUERY_KEY })
 						await router.navigate({ to: redirect })
 						return
