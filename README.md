@@ -13,11 +13,11 @@ An open-source, free point-of-sale system for restaurants and cafes — built as
 ![Turborepo](https://img.shields.io/badge/Turborepo-EF4444?logo=turborepo&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)
 
-> **Status: early-stage / work in progress.** Auth is functional; the actual POS features (menus, orders, tables, checkout) haven't been built yet. See [Roadmap](#roadmap) below.
+> **Status: early-stage / work in progress.** Authentication, the shop service, and initial shop onboarding are functional; the core POS features (menus, orders, tables, checkout) are still being built. See [Roadmap](#roadmap) below.
 
 ## Architecture
 
-A Turborepo/pnpm monorepo. `apps/frontend` is a client-side SPA that talks to `apps/auth`, a Cloudflare Workers service, over Hono's typed RPC client — so API calls are type-checked end-to-end with no shared schema package. `apps/auth` persists through `packages/database` (Drizzle ORM over TiDB Serverless); JWT signing/verification and auth middleware live in `packages/auth-kit` so any future service can reuse them without depending on `apps/auth` itself.
+A Turborepo/pnpm monorepo. `apps/frontend` is a client-side SPA that talks to `apps/auth` and `apps/shop`, Cloudflare Workers services, over Hono's typed RPC client — so API calls are type-checked end-to-end with no shared schema package. Authentication uses `httpOnly` cookies, while the shop service provides public directory access and authenticated owner operations. Both services persist through `packages/database` (Drizzle ORM over TiDB Serverless); JWT signing/verification and auth middleware live in `packages/auth-kit` so services can share the same access-token contract without reimplementing auth.
 
 ```mermaid
 flowchart LR
@@ -27,21 +27,27 @@ flowchart LR
 
     subgraph Edge["Cloudflare Workers"]
         AUTH["apps/auth<br/>Hono API<br/>(free-pos-auth)"]
+        SHOP["apps/shop<br/>Hono API<br/>(free-pos-shop)"]
     end
 
     DB[("TiDB Serverless")]
 
-    FE -- "Hono RPC (hc), httpOnly cookies" --> AUTH
+    FE -- "Hono RPC (hc), auth cookies" --> AUTH
+    FE -- "Hono RPC (hc)" --> SHOP
     AUTH -- "Drizzle ORM" --> DB
+    SHOP -- "Drizzle ORM" --> DB
 
     AK["packages/auth-kit<br/>JWT + requireAuth + cookies"] -.-> AUTH
+    AK -.-> SHOP
     DBP["packages/database<br/>Drizzle schema + client"] -.-> AUTH
+    DBP -.-> SHOP
     UI["packages/ui<br/>shadcn/ui + Tailwind v4"] -.-> FE
 ```
 
 **Apps**
-- `apps/auth` — Hono API on Cloudflare Workers. Email/password and Google OAuth authentication (register, login, refresh, `/me`), with HS256 JWTs delivered as `httpOnly` cookies.
-- `apps/frontend` — Vite + React 19 + TanStack Router SPA, deployed as a static-assets Worker. No SSR, no server component.
+- `apps/auth` — Hono API on Cloudflare Workers. Email/password and Google OAuth authentication (register, login, password recovery, refresh, `/me`), with HS256 JWTs delivered as `httpOnly` cookies.
+- `apps/shop` — Hono API on Cloudflare Workers. Public shop directory routes plus authenticated owner CRUD for shops, sharing the database and access-token secret with `apps/auth`.
+- `apps/frontend` — Vite + React 19 + TanStack Router SPA with authentication and shop onboarding, deployed as a static-assets Worker. No SSR, no server component.
 
 **Shared packages**
 - `packages/auth-kit` — JWT signing/verification, `requireAuth` middleware, cookie helpers.
@@ -51,8 +57,10 @@ flowchart LR
 
 ## Roadmap
 
-- [x] Email/password and Google OAuth auth (register, login, refresh, `/me`) with HS256 JWTs in `httpOnly` cookies
-- [x] Login page UI (`apps/frontend`)
+- [x] Email/password and Google OAuth auth (register, login, password recovery, refresh, `/me`) with HS256 JWTs in `httpOnly` cookies
+- [x] Login and registration page UI (`apps/frontend`)
+- [x] Shop service with public directory and owner-scoped CRUD
+- [x] Shop onboarding flow (`apps/frontend`)
 - [ ] Menu & item management
 - [ ] Table management
 - [ ] Order taking / kitchen tickets
@@ -64,6 +72,7 @@ flowchart LR
 - [Backend application conventions](./docs/conventions/backend.md) — structure and layering rules for backend apps.
 - [`CLAUDE.md`](./CLAUDE.md) — repository architecture, commands, and contribution guidance.
 - [`apps/auth/CLAUDE.md`](./apps/auth/CLAUDE.md) — authentication service setup, architecture, and testing.
+- [`apps/shop/CLAUDE.md`](./apps/shop/CLAUDE.md) — shop service setup, routes, authentication, and testing.
 
 ## Getting Started
 
@@ -74,7 +83,7 @@ pnpm install
 pnpm dev
 ```
 
-This runs every app in dev mode via Turborepo (`apps/auth` on `wrangler dev`, `apps/frontend` on Vite). Each app and package needs its own local env setup (database connection string, JWT secret, etc.) before `dev`/`test` will work — see the `CLAUDE.md` in each of `apps/auth`, `apps/frontend`, and `packages/database` for exact steps.
+This runs every app in dev mode via Turborepo (`apps/auth` on `wrangler dev`, `apps/shop` on `wrangler dev`, and `apps/frontend` on Vite). Each app and package needs its own local env setup (database connection string, JWT secret, frontend origin, etc.) before `dev`/`test` will work — see the `CLAUDE.md` files in `apps/auth`, `apps/shop`, `apps/frontend`, and `packages/database` for exact steps.
 
 Other root-level commands (see [`CLAUDE.md`](./CLAUDE.md) for the full list):
 
@@ -84,6 +93,10 @@ pnpm lint        # turbo run lint (biome)
 pnpm typecheck   # turbo run typecheck
 pnpm test        # turbo run test
 ```
+
+## Deployment
+
+Pushing to the `production` branch runs [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml). The workflow applies pending database migrations, deploys `apps/auth` and `apps/shop` as Cloudflare Workers, and builds and deploys `apps/frontend` as a static-assets Worker. Production Worker bindings and GitHub Actions secrets are configured outside the repository; see the app-specific `CLAUDE.md` files for the required values.
 
 ## License
 
