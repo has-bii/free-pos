@@ -24,8 +24,4 @@ export const shopSlugParamSchema = v.object({
 	),
 })
 
-export const shopIdParamSchema = v.object({
-	id: v.pipe(v.string(), v.uuid("Invalid shop ID.")),
-})
-
 export type ShopBody = v.InferOutput<typeof shopBodySchema>

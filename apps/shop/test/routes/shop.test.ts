@@ -61,7 +61,7 @@ describe("shop routes", () => {
 		expect(publicRead.status).toBe(200)
 		expect((await json<ShopResponse>(publicRead)).data.shop.id).toBe(created.id)
 
-		const update = await request(`/shops/${created.id}`, {
+		const update = await request("/shops/me", {
 			method: "PUT",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ name: "Updated Route Shop", description: null, address: "Main Street" }),
@@ -69,7 +69,7 @@ describe("shop routes", () => {
 		expect(update.status).toBe(200)
 		expect((await json<ShopResponse>(update)).data.shop.slug).toBe("updated-route-shop")
 
-		const remove = await request(`/shops/${created.id}`, { method: "DELETE" })
+		const remove = await request("/shops/me", { method: "DELETE" })
 		expect(remove.status).toBe(200)
 		expect((await json<MessageResponse>(remove)).message).toBe("Shop deleted.")
 	})

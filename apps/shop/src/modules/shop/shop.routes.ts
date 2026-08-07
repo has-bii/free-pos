@@ -14,5 +14,5 @@ export const shopRoutes = factory
 	.get("/shops/me", ...getMyShopHandlers)
 	.get("/shops/:slug", ...getShopBySlugHandlers)
 	.post("/shops", ...createShopHandlers)
-	.put("/shops/:id", ...updateShopHandlers)
-	.delete("/shops/:id", ...deleteShopHandlers)
+	.put("/shops/me", ...updateShopHandlers)
+	.delete("/shops/me", ...deleteShopHandlers)
