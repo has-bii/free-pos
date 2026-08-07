@@ -11,4 +11,21 @@ export const shopBodySchema = v.object({
 	address: v.nullable(v.string()),
 })
 
+export const shopListQuerySchema = v.object({
+	cursor: v.optional(v.string()),
+})
+
+export const shopSlugParamSchema = v.object({
+	slug: v.pipe(
+		v.string(),
+		v.nonEmpty("Slug is required."),
+		v.maxLength(64, "Slug must be at most 64 characters."),
+		v.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid shop slug."),
+	),
+})
+
+export const shopIdParamSchema = v.object({
+	id: v.pipe(v.string(), v.uuid("Invalid shop ID.")),
+})
+
 export type ShopBody = v.InferOutput<typeof shopBodySchema>
