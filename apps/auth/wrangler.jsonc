@@ -16,6 +16,7 @@
 	// configured out-of-band via `wrangler secret put` and never appear in this file. `.dev.vars`
 	// supplies all nine for local dev — see .dev.vars.example.
 	"dev": {
-		"port": 8787
+		"port": 8787,
+		"inspector_port": 9229
 	}
 }
