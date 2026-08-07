@@ -13,7 +13,7 @@ catalog:
   "@tsndr/cloudflare-worker-jwt": 3.2.1
   "@biomejs/biome": 2.5.6
   hono: 4.12.33
-  wrangler: 4.117.0
+  wrangler: 4.119.0
   drizzle-orm: 0.45.2
   drizzle-kit: 0.31.10
   "@tidbcloud/serverless": 0.3.0
