@@ -11,8 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as UnauthenticatedRouteImport } from './routes/_unauthenticated'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/_dashboard'
 import { Route as UnauthenticatedAuthRouteImport } from './routes/_unauthenticated/auth'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/_dashboard/index'
 import { Route as AuthenticatedOnboardingIndexRouteImport } from './routes/_authenticated/onboarding/index'
 import { Route as AuthenticatedOnboardingCompleteRouteImport } from './routes/_authenticated/onboarding/complete'
 import { Route as AuthenticatedOnboardingShopRouteImport } from './routes/_authenticated/onboarding/shop'
@@ -32,9 +33,8 @@ const UnauthenticatedRoute = UnauthenticatedRouteImport.update({
   id: '/_unauthenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/_dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const UnauthenticatedAuthRoute = UnauthenticatedAuthRouteImport.update({
@@ -42,6 +42,12 @@ const UnauthenticatedAuthRoute = UnauthenticatedAuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => UnauthenticatedRoute,
 } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedOnboardingIndexRoute =
   AuthenticatedOnboardingIndexRouteImport.update({
     id: '/onboarding/',
@@ -104,7 +110,7 @@ const UnauthenticatedAuthSuccessRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof AuthenticatedDashboardIndexRoute
   '/auth': typeof UnauthenticatedAuthRouteWithChildren
   '/onboarding/complete': typeof AuthenticatedOnboardingCompleteRoute
   '/onboarding/shop': typeof AuthenticatedOnboardingShopRoute
@@ -118,7 +124,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/': typeof AuthenticatedOnboardingIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof AuthenticatedDashboardIndexRoute
   '/auth': typeof UnauthenticatedAuthRouteWithChildren
   '/onboarding/complete': typeof AuthenticatedOnboardingCompleteRoute
   '/onboarding/shop': typeof AuthenticatedOnboardingShopRoute
@@ -135,8 +141,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_unauthenticated': typeof UnauthenticatedRouteWithChildren
+  '/_authenticated/_dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_unauthenticated/auth': typeof UnauthenticatedAuthRouteWithChildren
-  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/onboarding/complete': typeof AuthenticatedOnboardingCompleteRoute
   '/_authenticated/onboarding/shop': typeof AuthenticatedOnboardingShopRoute
   '/_authenticated/onboarding/welcome': typeof AuthenticatedOnboardingWelcomeRoute
@@ -146,6 +152,7 @@ export interface FileRoutesById {
   '/_unauthenticated/auth/register': typeof UnauthenticatedAuthRegisterRoute
   '/_unauthenticated/auth/reset-password': typeof UnauthenticatedAuthResetPasswordRoute
   '/_unauthenticated/auth/success': typeof UnauthenticatedAuthSuccessRoute
+  '/_authenticated/_dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/onboarding/': typeof AuthenticatedOnboardingIndexRoute
 }
 export interface FileRouteTypes {
@@ -181,8 +188,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/_unauthenticated'
+    | '/_authenticated/_dashboard'
     | '/_unauthenticated/auth'
-    | '/_authenticated/'
     | '/_authenticated/onboarding/complete'
     | '/_authenticated/onboarding/shop'
     | '/_authenticated/onboarding/welcome'
@@ -192,6 +199,7 @@ export interface FileRouteTypes {
     | '/_unauthenticated/auth/register'
     | '/_unauthenticated/auth/reset-password'
     | '/_unauthenticated/auth/success'
+    | '/_authenticated/_dashboard/'
     | '/_authenticated/onboarding/'
   fileRoutesById: FileRoutesById
 }
@@ -216,11 +224,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnauthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
+    '/_authenticated/_dashboard': {
+      id: '/_authenticated/_dashboard'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_unauthenticated/auth': {
@@ -229,6 +237,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof UnauthenticatedAuthRouteImport
       parentRoute: typeof UnauthenticatedRoute
+    }
+    '/_authenticated/_dashboard/': {
+      id: '/_authenticated/_dashboard/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/onboarding/': {
       id: '/_authenticated/onboarding/'
@@ -303,8 +318,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedOnboardingCompleteRoute: typeof AuthenticatedOnboardingCompleteRoute
   AuthenticatedOnboardingShopRoute: typeof AuthenticatedOnboardingShopRoute
   AuthenticatedOnboardingWelcomeRoute: typeof AuthenticatedOnboardingWelcomeRoute
@@ -312,7 +341,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedOnboardingCompleteRoute: AuthenticatedOnboardingCompleteRoute,
   AuthenticatedOnboardingShopRoute: AuthenticatedOnboardingShopRoute,
   AuthenticatedOnboardingWelcomeRoute: AuthenticatedOnboardingWelcomeRoute,

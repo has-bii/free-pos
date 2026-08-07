@@ -11,7 +11,7 @@ export const getMeQueryOption = () => {
 
 			if (res.ok) {
 				const data = await res.json()
-				return data.data
+				return data.data.user
 			}
 
 			const data = await res.json()
