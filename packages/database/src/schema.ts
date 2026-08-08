@@ -1,4 +1,4 @@
-import { boolean, int, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
+import { boolean, index, int, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core"
 import { uuidv7 } from "uuidv7"
 
 export const user = mysqlTable("user", {
@@ -32,8 +32,8 @@ export const shop = mysqlTable(
 	(table) => [uniqueIndex("shop_owner_unique").on(table.ownerUserId), uniqueIndex("shop_slug_unique").on(table.slug)],
 )
 
-export const product = mysqlTable(
-	"product",
+export const category = mysqlTable(
+	"category",
 	{
 		id: varchar("id", { length: 36 })
 			.primaryKey()
@@ -43,13 +43,34 @@ export const product = mysqlTable(
 			.references(() => shop.id, { onDelete: "cascade" }),
 		name: varchar("name", { length: 255 }).notNull(),
 		slug: varchar("slug", { length: 64 }).notNull(),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+	},
+	(table) => [uniqueIndex("category_shop_slug_unique").on(table.shopId, table.slug)],
+)
+
+export const product = mysqlTable(
+	"product",
+	{
+		id: varchar("id", { length: 36 })
+			.primaryKey()
+			.$defaultFn(() => uuidv7()),
+		shopId: varchar("shop_id", { length: 36 })
+			.notNull()
+			.references(() => shop.id, { onDelete: "cascade" }),
+		categoryId: varchar("category_id", { length: 36 }).references(() => category.id, { onDelete: "set null" }),
+		name: varchar("name", { length: 255 }).notNull(),
+		slug: varchar("slug", { length: 64 }).notNull(),
 		description: text("description"),
 		priceMinor: int("price_minor").notNull(),
 		isActive: boolean("is_active").notNull(),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 	},
-	(table) => [uniqueIndex("product_shop_slug_unique").on(table.shopId, table.slug)],
+	(table) => [
+		uniqueIndex("product_shop_slug_unique").on(table.shopId, table.slug),
+		index("product_category_id_idx").on(table.categoryId),
+	],
 )
 
 export const session = mysqlTable("session", {

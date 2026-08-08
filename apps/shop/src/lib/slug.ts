@@ -1,4 +1,4 @@
-import { InvalidProductNameError, InvalidShopNameError } from "@repo/shop/errors"
+import { InvalidCategoryNameError, InvalidProductNameError, InvalidShopNameError } from "@repo/shop/errors"
 
 const MAX_SLUG_LENGTH = 64
 
@@ -15,6 +15,15 @@ export const deriveSlug = (name: string): string => {
 	if (boundary <= 0) throw new InvalidShopNameError()
 
 	return slug.slice(0, boundary)
+}
+
+export const deriveCategorySlug = (name: string): string => {
+	try {
+		return deriveSlug(name)
+	} catch (err) {
+		if (err instanceof InvalidShopNameError) throw new InvalidCategoryNameError()
+		throw err
+	}
 }
 
 export const deriveProductSlug = (name: string): string => {

@@ -22,6 +22,7 @@ type ProductShape = {
 	shopId: string
 	name: string
 	slug: string
+	categoryId: string | null
 	description: string | null
 	priceMinor: number
 	isActive: boolean
@@ -103,6 +104,7 @@ describe("product routes", () => {
 				description: "250g bag",
 				priceMinor: 1299,
 				isActive: true,
+				categoryId: null,
 			}),
 		})
 		expect(create.status).toBe(201)
@@ -113,12 +115,19 @@ describe("product routes", () => {
 			description: "250g bag",
 			priceMinor: 1299,
 			isActive: true,
+			categoryId: null,
 		})
 
 		const inactive = await request("/shops/me/products", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: "Inactive Coffee", description: null, priceMinor: 0, isActive: false }),
+			body: JSON.stringify({
+				name: "Inactive Coffee",
+				description: null,
+				priceMinor: 0,
+				isActive: false,
+				categoryId: null,
+			}),
 		})
 		expect(inactive.status).toBe(201)
 
@@ -140,6 +149,7 @@ describe("product routes", () => {
 				description: null,
 				priceMinor: 1399,
 				isActive: false,
+				categoryId: null,
 			}),
 		})
 		expect(update.status).toBe(200)
@@ -150,12 +160,19 @@ describe("product routes", () => {
 			description: null,
 			priceMinor: 1399,
 			isActive: false,
+			categoryId: null,
 		})
 
 		const duplicate = await request("/shops/me/products", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: "House Blend", description: null, priceMinor: 1, isActive: true }),
+			body: JSON.stringify({
+				name: "House Blend",
+				description: null,
+				priceMinor: 1,
+				isActive: true,
+				categoryId: null,
+			}),
 		})
 		expect(duplicate.status).toBe(409)
 

@@ -33,6 +33,20 @@ export class ProductSlugExistsError extends Error {
 	}
 }
 
+export class CategorySlugExistsError extends Error {
+	constructor(slug: string) {
+		super(`Category slug already exists: ${slug}`)
+		this.name = "CategorySlugExistsError"
+	}
+}
+
+export class InvalidCategoryNameError extends Error {
+	constructor() {
+		super("Category name must contain at least one letter or number.")
+		this.name = "InvalidCategoryNameError"
+	}
+}
+
 export class InvalidProductNameError extends Error {
 	constructor() {
 		super("Product name must contain at least one letter or number.")

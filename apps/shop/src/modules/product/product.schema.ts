@@ -12,6 +12,7 @@ export const productBodySchema = v.strictObject({
 	description: v.nullable(v.pipe(v.string(), v.maxLength(200, "Description must be at most 200 characters."))),
 	priceMinor: v.pipe(v.number(), v.integer(), v.minValue(0)),
 	isActive: v.boolean(),
+	categoryId: v.nullable(v.pipe(v.string(), v.regex(PRODUCT_ID_PATTERN, "Invalid category ID."))),
 })
 
 export const productListQuerySchema = v.strictObject({

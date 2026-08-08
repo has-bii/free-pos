@@ -10,6 +10,7 @@ import {
 	productIdParamSchema,
 	productListQuerySchema,
 } from "@repo/shop/modules/product/product.schema"
+import { CategoryRepository } from "@repo/shop/repositories/category.repository"
 import { ProductRepository } from "@repo/shop/repositories/product.repository"
 import { ShopRepository } from "@repo/shop/repositories/shop.repository"
 
@@ -21,6 +22,10 @@ export const createProductHandlers = factory.createHandlers(auth, validate("json
 	const db = c.var.db
 	const foundShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
 	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+
+	if (body.categoryId !== null && !(await CategoryRepository.findById(db, body.categoryId, foundShop.id))) {
+		return c.json({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }, 422)
+	}
 
 	let slug: string
 	try {
@@ -39,6 +44,7 @@ export const createProductHandlers = factory.createHandlers(auth, validate("json
 			description: body.description,
 			priceMinor: body.priceMinor,
 			isActive: body.isActive,
+			categoryId: body.categoryId,
 		})
 	} catch (err) {
 		if (err instanceof ProductSlugExistsError) return c.json({ message: "Product slug is already taken." }, 409)
@@ -105,6 +111,10 @@ export const updateProductHandlers = factory.createHandlers(
 		const foundProduct = await ProductRepository.findById(db, id, foundShop.id)
 		if (!foundProduct) return c.json({ message: "Product not found." }, 404)
 
+		if (body.categoryId !== null && !(await CategoryRepository.findById(db, body.categoryId, foundShop.id))) {
+			return c.json({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }, 422)
+		}
+
 		let slug: string
 		try {
 			slug = deriveProductSlug(body.name)
@@ -120,6 +130,7 @@ export const updateProductHandlers = factory.createHandlers(
 				description: body.description,
 				priceMinor: body.priceMinor,
 				isActive: body.isActive,
+				categoryId: body.categoryId,
 			})
 		} catch (err) {
 			if (err instanceof ProductSlugExistsError) return c.json({ message: "Product slug is already taken." }, 409)

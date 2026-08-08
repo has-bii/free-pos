@@ -36,7 +36,10 @@ export const ProductRepository = {
 		db: DatabaseExecutor,
 		id: string,
 		shopId: string,
-		patch: Pick<typeof product.$inferInsert, "name" | "slug" | "description" | "priceMinor" | "isActive">,
+		patch: Pick<
+			typeof product.$inferInsert,
+			"name" | "slug" | "description" | "priceMinor" | "isActive" | "categoryId"
+		>,
 	) => {
 		try {
 			await db

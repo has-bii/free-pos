@@ -1,4 +1,5 @@
 import { factory } from "@repo/shop/factory"
+import { categoryRoutes } from "@repo/shop/modules/category/category.routes"
 import { productRoutes } from "@repo/shop/modules/product/product.routes"
 import {
 	createShopHandlers,
@@ -17,4 +18,5 @@ export const shopRoutes = factory
 	.post("/shops", ...createShopHandlers)
 	.put("/shops/me", ...updateShopHandlers)
 	.delete("/shops/me", ...deleteShopHandlers)
+	.route("/", categoryRoutes)
 	.route("/", productRoutes)
