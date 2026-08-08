@@ -9,6 +9,7 @@ import { defineConfig } from "vite"
 const srcDir = `${import.meta.dirname}/src/`
 const uiSrcDir = `${import.meta.dirname}/../../packages/ui/src/`
 const authSrcDir = `${import.meta.dirname}/../auth/src/`
+const honoUtilsSrcDir = `${import.meta.dirname}/../../packages/hono-utils/src/`
 const shopSrcDir = `${import.meta.dirname}/../shop/src/`
 
 export default defineConfig({
@@ -23,6 +24,7 @@ export default defineConfig({
 			{ find: /^@repo\/frontend\//, replacement: srcDir },
 			{ find: /^@repo\/ui\//, replacement: uiSrcDir },
 			{ find: /^@repo\/auth\//, replacement: authSrcDir },
+			{ find: /^@repo\/hono-utils\//, replacement: honoUtilsSrcDir },
 			{ find: /^@repo\/shop\//, replacement: shopSrcDir },
 		],
 	},

@@ -26,7 +26,9 @@ const PATH = "/logout"
 
 const expectUnauthorized = async (res: Response) => {
 	expect(res.status).toBe(401)
-	expect((await readJson<MessageBody>(res)).message).toBe("Unauthorized.")
+	const body = await readJson<MessageBody>(res)
+	expect(body.success).toBe(false)
+	expect(body.message).toBe("Unauthorized.")
 }
 
 const accessTokenOf = (fixture: Awaited<ReturnType<typeof registerUser>>): string => {
@@ -42,7 +44,10 @@ describe("POST /logout", () => {
 
 		const res = await post(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, accessTokenOf(fixture)))
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe("Logged out.")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("User logged out successfully.")
+		expect(body.data).toBeNull()
 
 		const cookies = res.headers.getSetCookie()
 		expect(cookies.some((c) => c.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`) && c.includes("Max-Age=0"))).toBe(true)
@@ -77,7 +82,10 @@ describe("POST /logout", () => {
 
 		const second = await post(PATH, cookieHeader(ACCESS_TOKEN_COOKIE_NAME, token))
 		expect(second.status).toBe(200)
-		expect((await readJson<MessageBody>(second)).message).toBe("Logged out.")
+		const body = await readJson<MessageBody>(second)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("User logged out successfully.")
+		expect(body.data).toBeNull()
 	})
 
 	// Case 4
@@ -97,6 +105,7 @@ describe("POST /logout", () => {
 		const me = await get("/me", cookieHeader(ACCESS_TOKEN_COOKIE_NAME, token))
 		expect(me.status).toBe(200)
 		const meBody = await readJson<MeSuccessBody>(me)
-		expect(meBody.data.user.id).toBe(fixture.user.id)
+		expect(meBody.success).toBe(true)
+		expect(meBody.data.id).toBe(fixture.user.id)
 	})
 })

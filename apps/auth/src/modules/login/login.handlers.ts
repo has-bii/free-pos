@@ -9,6 +9,7 @@ import { AccountRepository } from "@repo/auth/repositories/account.repository"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
 import { UserRepository } from "@repo/auth/repositories/user.repository"
 import { setAuthCookies } from "@repo/auth-kit/cookies"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import type { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { loginEmailSchema } from "./login.schema"
@@ -117,7 +118,7 @@ export const loginEmailHandlers = factory.createHandlers(validate("json", loginE
 	const { email, password } = c.req.valid("json")
 	const db = c.var.db
 
-	const invalidCredentials = () => c.json({ message: "Invalid email or password." }, 401)
+	const invalidCredentials = () => c.json(errorResponse({ message: "Invalid email or password." }), 401)
 
 	const foundUser = await UserRepository.findByEmail(db, email)
 	if (!foundUser) return invalidCredentials()
@@ -137,10 +138,7 @@ export const loginEmailHandlers = factory.createHandlers(validate("json", loginE
 
 	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.FREE_POS_COOKIE_DOMAIN })
 
-	return c.json({
-		message: "ok",
-		data: { user: foundUser },
-	})
+	return c.json(successResponse("User logged in successfully.", foundUser))
 })
 
 export const googleInitiationHandlers = factory.createHandlers(async (c) => {

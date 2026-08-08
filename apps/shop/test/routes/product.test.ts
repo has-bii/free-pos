@@ -27,12 +27,13 @@ type ProductShape = {
 	priceMinor: number
 	isActive: boolean
 }
-type ProductResponse = { message: string; data: { product: ProductShape } }
+type ProductResponse = { success: true; message: string; data: ProductShape }
 type ProductListResponse = {
+	success: true
 	message: string
 	data: { data: ProductShape[]; pagination: { nextCursor: string | null } }
 }
-type MessageResponse = { message: string }
+type MessageResponse = { success: boolean; message: string; data?: unknown }
 const json = <T>(res: Response) => res.json() as Promise<T>
 
 beforeAll(async () => {
@@ -108,7 +109,10 @@ describe("product routes", () => {
 			}),
 		})
 		expect(create.status).toBe(201)
-		const created = (await json<ProductResponse>(create)).data.product
+		const createdBody = await json<ProductResponse>(create)
+		expect(createdBody.success).toBe(true)
+		expect(createdBody.message).toBe("Product created successfully.")
+		const created = createdBody.data
 		expect(created).toMatchObject({
 			name: "Arabica Coffee",
 			slug: "arabica-coffee",
@@ -133,13 +137,20 @@ describe("product routes", () => {
 
 		const list = await request("/shops/me/products")
 		expect(list.status).toBe(200)
-		const listed = (await json<ProductListResponse>(list)).data.data
+		const listedBody = await json<ProductListResponse>(list)
+		expect(listedBody.success).toBe(true)
+		expect(listedBody.message).toBe("Products fetched successfully.")
+		expect(listedBody.data.pagination.nextCursor).toBeNull()
+		const listed = listedBody.data.data
 		expect(listed).toHaveLength(2)
 		expect(listed.map((product) => product.isActive).sort()).toEqual([false, true])
 
 		const detail = await request(`/shops/me/products/${created.id}`)
 		expect(detail.status).toBe(200)
-		expect((await json<ProductResponse>(detail)).data.product.id).toBe(created.id)
+		const detailBody = await json<ProductResponse>(detail)
+		expect(detailBody.success).toBe(true)
+		expect(detailBody.message).toBe("Product fetched successfully.")
+		expect(detailBody.data.id).toBe(created.id)
 
 		const update = await request(`/shops/me/products/${created.id}`, {
 			method: "PUT",
@@ -153,7 +164,10 @@ describe("product routes", () => {
 			}),
 		})
 		expect(update.status).toBe(200)
-		expect((await json<ProductResponse>(update)).data.product).toMatchObject({
+		const updateBody = await json<ProductResponse>(update)
+		expect(updateBody.success).toBe(true)
+		expect(updateBody.message).toBe("Product updated successfully.")
+		expect(updateBody.data).toMatchObject({
 			id: created.id,
 			name: "House Blend",
 			slug: "house-blend",
@@ -178,7 +192,10 @@ describe("product routes", () => {
 
 		const remove = await request(`/shops/me/products/${created.id}`, { method: "DELETE" })
 		expect(remove.status).toBe(200)
-		expect((await json<MessageResponse>(remove)).message).toBe("Product deleted.")
+		const removeBody = await json<MessageResponse>(remove)
+		expect(removeBody.success).toBe(true)
+		expect(removeBody.message).toBe("Product deleted successfully.")
+		expect(removeBody.data).toBeNull()
 
 		const afterDelete = await request(`/shops/me/products/${created.id}`)
 		expect(afterDelete.status).toBe(404)

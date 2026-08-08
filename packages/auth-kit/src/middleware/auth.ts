@@ -1,5 +1,6 @@
 import { ACCESS_TOKEN_COOKIE_NAME } from "@repo/auth-kit/cookies"
 import { JWT } from "@repo/auth-kit/jwt"
+import { errorResponse } from "@repo/hono-utils/response"
 import type { Context, Env } from "hono"
 import { getCookie } from "hono/cookie"
 import { createMiddleware } from "hono/factory"
@@ -18,7 +19,7 @@ type RequireAuthEnv = Env & {
  */
 export const requireAuth = <E extends RequireAuthEnv>(getSecret: (c: Context<E>) => string) => {
 	return createMiddleware<E>(async (c, next) => {
-		const unauthorized = () => c.json({ message: "Unauthorized." }, 401)
+		const unauthorized = () => c.json(errorResponse({ message: "Unauthorized." }), 401)
 
 		const token = getCookie(c, ACCESS_TOKEN_COOKIE_NAME)
 		if (!token) return unauthorized()

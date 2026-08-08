@@ -3,6 +3,7 @@ import { Session } from "@repo/auth/lib/session"
 import { SessionRepository } from "@repo/auth/repositories/session.repository"
 import { clearAuthCookies, REFRESH_TOKEN_COOKIE_NAME, setAuthCookies } from "@repo/auth-kit/cookies"
 import { JWT } from "@repo/auth-kit/jwt"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import { getCookie } from "hono/cookie"
 
 export const refreshHandlers = factory.createHandlers(async (c) => {
@@ -15,7 +16,7 @@ export const refreshHandlers = factory.createHandlers(async (c) => {
 	// failure clears both cookies too.
 	const invalidToken = () => {
 		clearAuthCookies(c, { cookieDomain })
-		return c.json({ message: "Invalid or expired refresh token." }, 401)
+		return c.json(errorResponse({ message: "Invalid or expired refresh token." }), 401)
 	}
 
 	const refreshToken = getCookie(c, REFRESH_TOKEN_COOKIE_NAME)
@@ -38,5 +39,5 @@ export const refreshHandlers = factory.createHandlers(async (c) => {
 
 	setAuthCookies(c, { accessToken: rotated.accessToken, refreshToken: rotated.refreshToken }, { cookieDomain })
 
-	return c.json({ message: "ok" })
+	return c.json(successResponse("Token refreshed successfully.", null))
 })

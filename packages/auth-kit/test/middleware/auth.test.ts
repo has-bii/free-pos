@@ -34,7 +34,7 @@ describe("requireAuth", () => {
 	it("rejects a request with no cookie at all", async () => {
 		const res = await buildApp().request("/protected")
 		expect(res.status).toBe(401)
-		expect(await res.json()).toEqual({ message: "Unauthorized." })
+		expect(await res.json()).toEqual({ success: false, message: "Unauthorized." })
 	})
 
 	it("rejects a garbage cookie value", async () => {

@@ -1,4 +1,5 @@
 import { vValidator } from "@hono/valibot-validator"
+import { errorResponse } from "@repo/hono-utils/response"
 import type { ValidationTargets } from "hono"
 import type { GenericSchema, GenericSchemaAsync } from "valibot"
 
@@ -15,6 +16,6 @@ export const validate = <T extends GenericSchema | GenericSchemaAsync, Target ex
 				error[field] = { message: issue.message }
 			}
 		}
-		return c.json({ message: "Validation failed.", error }, 400)
+		return c.json(errorResponse({ message: "Validation failed.", error }), 400)
 	})
 }

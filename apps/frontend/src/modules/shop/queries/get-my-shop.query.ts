@@ -23,7 +23,7 @@ const getMyShop = async () => {
 		throw new ShopApiError(data.message ?? "Unable to load your shop.", response.status)
 	}
 
-	return data.data.shop
+	return data.data
 }
 
 export type Shop = NonNullable<Awaited<ReturnType<typeof getMyShop>>>

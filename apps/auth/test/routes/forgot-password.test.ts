@@ -39,6 +39,10 @@ const PATH = "/recovery/forgot-password"
 const GENERIC_MESSAGE = "If an account exists for that email, a password reset link has been sent."
 const RESET_URL_PREFIX = `${env.FREE_POS_FRONTEND_ORIGIN}/auth/reset-password?token=`
 
+const expectGenericSuccess = async (res: Response) => {
+	expect(await readJson<MessageBody>(res)).toEqual({ success: true, message: GENERIC_MESSAGE, data: null })
+}
+
 describe("POST /recovery/forgot-password", () => {
 	// Case 1
 	it("sends a reset link to an existing email and stores a single-use token hash", async () => {
@@ -46,7 +50,7 @@ describe("POST /recovery/forgot-password", () => {
 
 		const res = await postJson(PATH, { email })
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe(GENERIC_MESSAGE)
+		await expectGenericSuccess(res)
 		// No cookies: the request side of recovery creates no session.
 		expect(res.headers.getSetCookie()).toHaveLength(0)
 
@@ -95,7 +99,7 @@ describe("POST /recovery/forgot-password", () => {
 
 		const res = await postJson(PATH, { email })
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe(GENERIC_MESSAGE)
+		await expectGenericSuccess(res)
 		expect(await findVerificationsByIdentifier(email)).toHaveLength(1)
 		expect(capturedEmails).toHaveLength(1)
 		expect(capturedEmails[0]?.to).toBe(email)
@@ -107,7 +111,7 @@ describe("POST /recovery/forgot-password", () => {
 
 		const res = await postJson(PATH, { email })
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe(GENERIC_MESSAGE)
+		await expectGenericSuccess(res)
 
 		expect(await findVerificationsByIdentifier(email)).toHaveLength(0)
 		expect(capturedEmails).toHaveLength(0)
@@ -119,6 +123,7 @@ describe("POST /recovery/forgot-password", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.email).toEqual({ message: "Enter a valid email address." })
 	})
@@ -134,7 +139,7 @@ describe("POST /recovery/forgot-password", () => {
 
 		const second = await postJson(PATH, { email })
 		expect(second.status).toBe(200)
-		expect((await readJson<MessageBody>(second)).message).toBe(GENERIC_MESSAGE)
+		await expectGenericSuccess(second)
 
 		const rowsAfterSecond = await findVerificationsByIdentifier(email)
 		expect(rowsAfterSecond).toHaveLength(1)

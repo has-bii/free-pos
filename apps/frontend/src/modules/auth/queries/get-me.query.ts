@@ -11,7 +11,8 @@ export const getMeQueryOption = () => {
 
 			if (res.ok) {
 				const data = await res.json()
-				return data.data.user
+				if (!data.data) throw new Error("Unexpected error has occurred")
+				return data.data
 			}
 
 			const data = await res.json()

@@ -27,10 +27,14 @@ type CategoryShape = {
 	createdAt: string
 	updatedAt: string
 }
-type CategoryResponse = { message: string; data: CategoryShape }
-type CategoryListResponse = { message: string; data: CategoryShape[] }
-type ProductResponse = { message: string; data: { product: { id: string; categoryId: string | null } } }
-type MessageResponse = { message: string }
+type CategoryResponse = { success: true; message: string; data: CategoryShape }
+type CategoryListResponse = {
+	success: true
+	message: string
+	data: { data: CategoryShape[]; pagination: null }
+}
+type ProductResponse = { success: true; message: string; data: { id: string; categoryId: string | null } }
+type MessageResponse = { success: boolean; message: string; data?: unknown }
 const json = <T>(res: Response) => res.json() as Promise<T>
 
 beforeAll(async () => {
@@ -111,7 +115,7 @@ describe("category routes", () => {
 			body: JSON.stringify({ name: "Category Test Shop", description: null, address: null }),
 		})
 		expect(shopResponse.status).toBe(201)
-		const shop = (await json<{ message: string; data: { shop: { id: string } } }>(shopResponse)).data.shop
+		const shop = (await json<{ success: true; message: string; data: { id: string } }>(shopResponse)).data
 
 		for (const name of ["", "   ", "x".repeat(256)]) {
 			const invalid = await request("/shops/me/categories", {
@@ -170,8 +174,9 @@ describe("category routes", () => {
 		const list = await request("/shops/me/categories")
 		expect(list.status).toBe(200)
 		const listed = (await json<CategoryListResponse>(list)).data
-		expect(Array.isArray(listed)).toBe(true)
-		expect(listed.map((category) => category.name)).toEqual(["Bakery", "Beverages", "Zebra"])
+		expect(listed.pagination).toBeNull()
+		expect(Array.isArray(listed.data)).toBe(true)
+		expect(listed.data.map((category) => category.name)).toEqual(["Bakery", "Beverages", "Zebra"])
 
 		const malformed = await request("/shops/me/categories/not-a-uuid")
 		expect(malformed.status).toBe(400)
@@ -243,7 +248,7 @@ describe("category routes", () => {
 			}),
 		})
 		expect(productCreate.status).toBe(201)
-		const product = (await json<ProductResponse>(productCreate)).data.product
+		const product = (await json<ProductResponse>(productCreate)).data
 		expect(product.categoryId).toBe(created.id)
 
 		const crossShopProduct = await request("/shops/me/products", {
@@ -259,7 +264,8 @@ describe("category routes", () => {
 		})
 		expect(crossShopProduct.status).toBe(422)
 		expect(
-			(await json<{ error: { categoryId: { message: string } } }>(crossShopProduct)).error.categoryId.message,
+			(await json<{ success: false; error: { categoryId: { message: string } } }>(crossShopProduct)).error.categoryId
+				.message,
 		).toBe("Category not found.")
 
 		const productUpdate = await request(`/shops/me/products/${product.id}`, {
@@ -274,7 +280,7 @@ describe("category routes", () => {
 			}),
 		})
 		expect(productUpdate.status).toBe(200)
-		expect((await json<ProductResponse>(productUpdate)).data.product.categoryId).toBeNull()
+		expect((await json<ProductResponse>(productUpdate)).data.categoryId).toBeNull()
 
 		const productReassign = await request(`/shops/me/products/${product.id}`, {
 			method: "PUT",
@@ -291,12 +297,15 @@ describe("category routes", () => {
 
 		const remove = await request(`/shops/me/categories/${created.id}`, { method: "DELETE" })
 		expect(remove.status).toBe(200)
-		expect((await json<MessageResponse>(remove)).message).toBe("Category deleted.")
+		const removeBody = await json<MessageResponse>(remove)
+		expect(removeBody.success).toBe(true)
+		expect(removeBody.message).toBe("Category deleted successfully.")
+		expect(removeBody.data).toBeNull()
 		expect((await request(`/shops/me/categories/${created.id}`)).status).toBe(404)
 
 		const productAfterCategoryDelete = await request(`/shops/me/products/${product.id}`)
 		expect(productAfterCategoryDelete.status).toBe(200)
-		expect((await json<ProductResponse>(productAfterCategoryDelete)).data.product.categoryId).toBeNull()
+		expect((await json<ProductResponse>(productAfterCategoryDelete)).data.categoryId).toBeNull()
 
 		const deleteShop = await request("/shops/me", { method: "DELETE" })
 		expect(deleteShop.status).toBe(200)

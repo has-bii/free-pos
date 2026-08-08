@@ -59,7 +59,10 @@ describe("POST /recovery/reset-password", () => {
 
 		const res = await postJson(PATH, { token, password: NEW_PASSWORD })
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe("Password has been reset.")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("Password reset successfully.")
+		expect(body.data).toBeNull()
 		// No session, no cookies — the user must log in again.
 		expect(res.headers.getSetCookie()).toHaveLength(0)
 
@@ -116,7 +119,9 @@ describe("POST /recovery/reset-password", () => {
 
 		const replay = await postJson(PATH, { token, password: "second-new-password" })
 		expect(replay.status).toBe(400)
-		expect((await readJson<MessageBody>(replay)).message).toBe(INVALID_TOKEN_MESSAGE)
+		const replayBody = await readJson<MessageBody>(replay)
+		expect(replayBody.success).toBe(false)
+		expect(replayBody.message).toBe(INVALID_TOKEN_MESSAGE)
 	})
 
 	// Case 3
@@ -133,14 +138,18 @@ describe("POST /recovery/reset-password", () => {
 
 		const res = await postJson(PATH, { token, password: NEW_PASSWORD })
 		expect(res.status).toBe(400)
-		expect((await readJson<MessageBody>(res)).message).toBe(INVALID_TOKEN_MESSAGE)
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
+		expect(body.message).toBe(INVALID_TOKEN_MESSAGE)
 	})
 
 	// Case 4 — one message for every failure mode, no oracle.
 	it("rejects a garbage token with the same message", async () => {
 		const res = await postJson(PATH, { token: "not-a-real-token", password: NEW_PASSWORD })
 		expect(res.status).toBe(400)
-		expect((await readJson<MessageBody>(res)).message).toBe(INVALID_TOKEN_MESSAGE)
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
+		expect(body.message).toBe(INVALID_TOKEN_MESSAGE)
 	})
 
 	// Case 5a — validation rejects before the handler runs, so a real token
@@ -153,6 +162,7 @@ describe("POST /recovery/reset-password", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.password).toEqual({ message: "Password must be at least 8 characters." })
 
@@ -166,6 +176,7 @@ describe("POST /recovery/reset-password", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.token).toBeDefined()
 	})

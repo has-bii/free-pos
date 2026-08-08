@@ -1,3 +1,5 @@
+import type { ErrorResponse } from "@repo/hono-utils/response"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import type { AppEnv } from "@repo/shop/factory"
 import { factory } from "@repo/shop/factory"
 import { dbMiddleware } from "@repo/shop/middleware/db"
@@ -19,17 +21,17 @@ const app = factory
 	.use(dbMiddleware)
 	.onError((err, c) => {
 		if (err instanceof HTTPException) {
-			return c.json({ message: err.message || "Request failed." }, err.status)
+			return c.json(errorResponse({ message: err.message || "Request failed." }), err.status)
 		}
 		console.error(err)
-		return c.json({ message: "Internal server error." }, 500)
+		return c.json(errorResponse({ message: "Internal server error." }), 500)
 	})
 	.get("/health", async (c) => {
 		try {
 			await c.var.db.execute(sql`select 1`)
-			return c.json({ status: "ok" })
+			return c.json(successResponse("Health check passed.", null))
 		} catch {
-			return c.json({ status: "error" }, 503)
+			return c.json(errorResponse({ status: "error" }), 503)
 		}
 	})
 	.route("/", shopRoutes)
@@ -38,6 +40,6 @@ export default app
 export type AppWithErrors = ApplyGlobalResponse<
 	typeof app,
 	{
-		400: { json: { message: string; error: Record<string, unknown> } }
+		400: { json: ErrorResponse<{ message: string; error: Record<string, unknown> }> }
 	}
 >

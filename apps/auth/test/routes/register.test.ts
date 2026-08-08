@@ -39,8 +39,10 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(201)
 
 		const body = await readJson<AuthSuccessBody>(res)
-		expect(body.data.user).toMatchObject({ email, name: "Test User" })
-		expect(body.data.user.id).toEqual(expect.any(String))
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("User registered successfully.")
+		expect(body.data).toMatchObject({ email, name: "Test User" })
+		expect(body.data.id).toEqual(expect.any(String))
 		expect(body).not.toHaveProperty("data.token")
 
 		const cookies = res.headers.getSetCookie()
@@ -110,7 +112,8 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(201)
 
 		const body = await readJson<AuthSuccessBody>(res)
-		expect(body.data.user.email).toBe(email)
+		expect(body.success).toBe(true)
+		expect(body.data.email).toBe(email)
 		expect(await findUserByEmail(email)).not.toBeNull()
 	})
 
@@ -123,6 +126,7 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.name).toEqual({ message: "Name is required." })
 	})
@@ -136,6 +140,7 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.email).toEqual({ message: "Enter a valid email address." })
 	})
@@ -149,6 +154,7 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.password).toEqual({ message: "Password must be at least 8 characters." })
 	})
@@ -160,6 +166,7 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(Object.keys(body.error).sort()).toEqual(["email", "name", "password"])
 	})
@@ -170,6 +177,7 @@ describe("POST /register/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Malformed JSON in request body")
 	})
 
@@ -181,6 +189,8 @@ describe("POST /register/email", () => {
 
 		const res = await postJson(PATH, validBody(email))
 		expect(res.status).toBe(409)
-		expect((await readJson<MessageBody>(res)).message).toBe("Email already registered.")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
+		expect(body.message).toBe("Email already registered.")
 	})
 })

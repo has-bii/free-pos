@@ -7,6 +7,10 @@ describe("GET /health", () => {
 		const res = await get("/health")
 
 		expect(res.status).toBe(200)
-		expect(await readJson<{ status: string }>(res)).toEqual({ status: "ok" })
+		expect(await readJson(res)).toEqual({
+			success: true,
+			message: "Health check passed.",
+			data: null,
+		})
 	})
 })

@@ -1,4 +1,5 @@
 import { requireAuth } from "@repo/auth-kit/middleware/auth"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import {
 	InvalidCursorError,
 	InvalidShopNameError,
@@ -24,32 +25,34 @@ export const listShopHandlers = factory.createHandlers(validate("query", shopLis
 			cursor = decodeCursor(rawCursor)
 		} catch (err) {
 			if (err instanceof InvalidCursorError) {
-				return c.json({ message: "Validation failed.", error: { cursor: { message: err.message } } }, 400)
+				return c.json(
+					errorResponse({ message: "Validation failed.", error: { cursor: { message: err.message } } }),
+					400,
+				)
 			}
 			throw err
 		}
 	}
 
 	const result = await ShopRepository.list(c.var.db, { limit: LIMIT, cursor })
-	return c.json({
-		message: "ok",
-		data: {
+	return c.json(
+		successResponse("Shops fetched successfully.", {
 			data: result.rows,
 			pagination: { nextCursor: result.nextCursor ? encodeCursor(result.nextCursor) : null },
-		},
-	})
+		}),
+	)
 })
 
 export const getMyShopHandlers = factory.createHandlers(auth, async (c) => {
 	const foundShop = await ShopRepository.findByOwnerUserId(c.var.db, c.var.userId)
-	return c.json({ message: "ok", data: { shop: foundShop } })
+	return c.json(successResponse("Shop fetched successfully.", foundShop))
 })
 
 export const getShopBySlugHandlers = factory.createHandlers(validate("param", shopSlugParamSchema), async (c) => {
 	const { slug } = c.req.valid("param")
 	const foundShop = await ShopRepository.findBySlug(c.var.db, slug)
-	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
-	return c.json({ message: "ok", data: { shop: foundShop } })
+	if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
+	return c.json(successResponse("Shop fetched successfully.", foundShop))
 })
 
 export const createShopHandlers = factory.createHandlers(auth, validate("json", shopBodySchema), async (c) => {
@@ -57,19 +60,19 @@ export const createShopHandlers = factory.createHandlers(auth, validate("json", 
 	const db = c.var.db
 
 	if (await ShopRepository.findByOwnerUserId(db, c.var.userId)) {
-		return c.json({ message: "You already have a shop." }, 409)
+		return c.json(errorResponse({ message: "You already have a shop." }), 409)
 	}
 
 	let slug: string
 	try {
 		slug = deriveSlug(body.name)
 	} catch (err) {
-		if (err instanceof InvalidShopNameError) return c.json({ message: err.message }, 422)
+		if (err instanceof InvalidShopNameError) return c.json(errorResponse({ message: err.message }), 422)
 		throw err
 	}
 
 	if (await ShopRepository.findBySlug(db, slug)) {
-		return c.json({ message: "Shop slug is already taken." }, 409)
+		return c.json(errorResponse({ message: "Shop slug is already taken." }), 409)
 	}
 
 	try {
@@ -81,33 +84,35 @@ export const createShopHandlers = factory.createHandlers(auth, validate("json", 
 			address: body.address,
 		})
 	} catch (err) {
-		if (err instanceof ShopAlreadyExistsError) return c.json({ message: "You already have a shop." }, 409)
-		if (err instanceof ShopSlugExistsError) return c.json({ message: "Shop slug is already taken." }, 409)
+		if (err instanceof ShopAlreadyExistsError)
+			return c.json(errorResponse({ message: "You already have a shop." }), 409)
+		if (err instanceof ShopSlugExistsError)
+			return c.json(errorResponse({ message: "Shop slug is already taken." }), 409)
 		throw err
 	}
 
 	const createdShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
 	if (!createdShop) throw new Error("Shop was inserted but could not be read back")
-	return c.json({ message: "Shop created.", data: { shop: createdShop } }, 201)
+	return c.json(successResponse("Shop created successfully.", createdShop), 201)
 })
 
 export const updateShopHandlers = factory.createHandlers(auth, validate("json", shopBodySchema), async (c) => {
 	const body = c.req.valid("json")
 	const db = c.var.db
 	const foundShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
-	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+	if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 	const { id } = foundShop
 	let slug: string
 	try {
 		slug = deriveSlug(body.name)
 	} catch (err) {
-		if (err instanceof InvalidShopNameError) return c.json({ message: err.message }, 422)
+		if (err instanceof InvalidShopNameError) return c.json(errorResponse({ message: err.message }), 422)
 		throw err
 	}
 
 	if (slug !== foundShop.slug && (await ShopRepository.slugExistsForOther(db, slug, id))) {
-		return c.json({ message: "Shop slug is already taken." }, 409)
+		return c.json(errorResponse({ message: "Shop slug is already taken." }), 409)
 	}
 
 	try {
@@ -118,20 +123,21 @@ export const updateShopHandlers = factory.createHandlers(auth, validate("json", 
 			address: body.address,
 		})
 	} catch (err) {
-		if (err instanceof ShopSlugExistsError) return c.json({ message: "Shop slug is already taken." }, 409)
+		if (err instanceof ShopSlugExistsError)
+			return c.json(errorResponse({ message: "Shop slug is already taken." }), 409)
 		throw err
 	}
 
 	const updatedShop = await ShopRepository.findById(db, id)
 	if (!updatedShop) throw new Error("Shop was updated but could not be read back")
-	return c.json({ message: "Shop updated.", data: { shop: updatedShop } })
+	return c.json(successResponse("Shop updated successfully.", updatedShop))
 })
 
 export const deleteShopHandlers = factory.createHandlers(auth, async (c) => {
 	const db = c.var.db
 	const foundShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
-	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+	if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 	await ShopRepository.delete(db, foundShop.id)
-	return c.json({ message: "Shop deleted." })
+	return c.json(successResponse("Shop deleted successfully.", null))
 })

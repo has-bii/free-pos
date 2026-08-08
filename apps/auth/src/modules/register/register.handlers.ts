@@ -9,6 +9,7 @@ import { SessionRepository } from "@repo/auth/repositories/session.repository"
 import { UserRepository } from "@repo/auth/repositories/user.repository"
 import { setAuthCookies } from "@repo/auth-kit/cookies"
 import type { user } from "@repo/database"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import { uuidv7 } from "uuidv7"
 import { registerEmailSchema } from "./register.schema"
 
@@ -18,7 +19,7 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 
 	const existing = await UserRepository.findByEmail(db, email)
 	if (existing) {
-		return c.json({ message: "Email already registered." }, 409)
+		return c.json(errorResponse({ message: "Email already registered." }), 409)
 	}
 
 	const now = new Date()
@@ -46,7 +47,7 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 		})
 	} catch (err) {
 		if (err instanceof EmailAlreadyExistsError) {
-			return c.json({ message: "Email already registered." }, 409)
+			return c.json(errorResponse({ message: "Email already registered." }), 409)
 		}
 		throw err
 	}
@@ -60,11 +61,5 @@ export const registerEmailHandlers = factory.createHandlers(validate("json", reg
 
 	setAuthCookies(c, { accessToken, refreshToken }, { cookieDomain: c.env.FREE_POS_COOKIE_DOMAIN })
 
-	return c.json(
-		{
-			message: "New user has been created",
-			data: { user: newUser },
-		},
-		201,
-	)
+	return c.json(successResponse("User registered successfully.", newUser), 201)
 })

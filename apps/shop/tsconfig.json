@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"paths": {
 			"@repo/shop/*": ["./src/*"],
-			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"]
+			"@repo/auth-kit/*": ["../../packages/auth-kit/src/*"],
+			"@repo/hono-utils/*": ["../../packages/hono-utils/src/*"]
 		},
 		"types": [
 			"./worker-configuration.d.ts",

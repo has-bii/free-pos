@@ -11,12 +11,14 @@ loadEnv({ path: ".env.test", quiet: true })
 // pulls in both the workerd and Node `URL` types, and they are not assignable.
 const srcDir = `${import.meta.dirname}/src/`
 const authKitSrcDir = `${import.meta.dirname}/../../packages/auth-kit/src/`
+const honoUtilsSrcDir = `${import.meta.dirname}/../../packages/hono-utils/src/`
 
 export default defineConfig({
 	resolve: {
 		alias: [
 			{ find: /^@repo\/auth\//, replacement: srcDir },
 			{ find: /^@repo\/auth-kit\//, replacement: authKitSrcDir },
+			{ find: /^@repo\/hono-utils\//, replacement: honoUtilsSrcDir },
 		],
 	},
 	plugins: [

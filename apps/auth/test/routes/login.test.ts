@@ -42,8 +42,10 @@ describe("POST /login/email", () => {
 		expect(res.status).toBe(200)
 
 		const body = await readJson<AuthSuccessBody>(res)
-		expect(body.data.user.id).toBe(fixture.user.id)
-		expect(body.data.user.email).toBe(fixture.email)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("User logged in successfully.")
+		expect(body.data.id).toBe(fixture.user.id)
+		expect(body.data.email).toBe(fixture.email)
 		expect(body).not.toHaveProperty("data.token")
 
 		const cookies = res.headers.getSetCookie()
@@ -76,7 +78,9 @@ describe("POST /login/email", () => {
 			password: `${fixture.password}-wrong`,
 		})
 		expect(res.status).toBe(401)
-		expect((await readJson<MessageBody>(res)).message).toBe("Invalid email or password.")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
+		expect(body.message).toBe("Invalid email or password.")
 	})
 
 	// Case 13 — identical message to case 12, so the endpoint does not leak
@@ -87,7 +91,9 @@ describe("POST /login/email", () => {
 			password: DEFAULT_PASSWORD,
 		})
 		expect(res.status).toBe(401)
-		expect((await readJson<MessageBody>(res)).message).toBe("Invalid email or password.")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(false)
+		expect(body.message).toBe("Invalid email or password.")
 	})
 
 	// Case 14
@@ -99,6 +105,7 @@ describe("POST /login/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.email).toEqual({ message: "Enter a valid email address." })
 	})
@@ -109,6 +116,7 @@ describe("POST /login/email", () => {
 		expect(res.status).toBe(400)
 
 		const body = await readJson<ValidationFailureBody>(res)
+		expect(body.success).toBe(false)
 		expect(body.message).toBe("Validation failed.")
 		expect(body.error.password).toEqual({ message: "Password is required." })
 	})

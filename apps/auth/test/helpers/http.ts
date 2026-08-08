@@ -26,18 +26,24 @@ export type UserBody = {
 }
 
 export type AuthSuccessBody = {
+	success: true
 	message: string
-	data: { user: UserBody }
+	data: UserBody
 }
 
-export type MeSuccessBody = { message: string; data: { user: UserBody } }
+export type MeSuccessBody = AuthSuccessBody
 
 export type ValidationFailureBody = {
+	success: false
 	message: string
 	error: Record<string, { message: string }>
 }
 
-export type MessageBody = { message: string }
+export type MessageBody = {
+	success: boolean
+	message: string
+	data?: unknown
+}
 
 export const readJson = async <T>(res: Response): Promise<T> => {
 	return (await res.json()) as T
@@ -187,5 +193,5 @@ export const registerUser = async (overrides: { name?: string; email?: string; p
 	}
 
 	const body = await readJson<AuthSuccessBody>(res)
-	return { name, email, password, user: body.data.user, client }
+	return { name, email, password, user: body.data, client }
 }

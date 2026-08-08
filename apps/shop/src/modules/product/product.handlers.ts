@@ -1,4 +1,5 @@
 import { requireAuth } from "@repo/auth-kit/middleware/auth"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import { InvalidCursorError, InvalidProductNameError, ProductSlugExistsError } from "@repo/shop/errors"
 import type { AppEnv } from "@repo/shop/factory"
 import { factory } from "@repo/shop/factory"
@@ -21,17 +22,20 @@ export const createProductHandlers = factory.createHandlers(auth, validate("json
 	const body = c.req.valid("json")
 	const db = c.var.db
 	const foundShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
-	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+	if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 	if (body.categoryId !== null && !(await CategoryRepository.findById(db, body.categoryId, foundShop.id))) {
-		return c.json({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }, 422)
+		return c.json(
+			errorResponse({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }),
+			422,
+		)
 	}
 
 	let slug: string
 	try {
 		slug = deriveProductSlug(body.name)
 	} catch (err) {
-		if (err instanceof InvalidProductNameError) return c.json({ message: err.message }, 422)
+		if (err instanceof InvalidProductNameError) return c.json(errorResponse({ message: err.message }), 422)
 		throw err
 	}
 
@@ -47,13 +51,15 @@ export const createProductHandlers = factory.createHandlers(auth, validate("json
 			categoryId: body.categoryId,
 		})
 	} catch (err) {
-		if (err instanceof ProductSlugExistsError) return c.json({ message: "Product slug is already taken." }, 409)
+		if (err instanceof ProductSlugExistsError) {
+			return c.json(errorResponse({ message: "Product slug is already taken." }), 409)
+		}
 		throw err
 	}
 
 	const createdProduct = await ProductRepository.findById(db, productId, foundShop.id)
 	if (!createdProduct) throw new Error("Product was inserted but could not be read back")
-	return c.json({ message: "Product created.", data: { product: createdProduct } }, 201)
+	return c.json(successResponse("Product created successfully.", createdProduct), 201)
 })
 
 export const listProductHandlers = factory.createHandlers(
@@ -62,7 +68,7 @@ export const listProductHandlers = factory.createHandlers(
 	async (c) => {
 		const { cursor: rawCursor } = c.req.valid("query")
 		const foundShop = await ShopRepository.findByOwnerUserId(c.var.db, c.var.userId)
-		if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+		if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 		let cursor: string | null = null
 		if (rawCursor !== undefined) {
@@ -70,31 +76,33 @@ export const listProductHandlers = factory.createHandlers(
 				cursor = decodeCursor(rawCursor)
 			} catch (err) {
 				if (err instanceof InvalidCursorError) {
-					return c.json({ message: "Validation failed.", error: { cursor: { message: err.message } } }, 400)
+					return c.json(
+						errorResponse({ message: "Validation failed.", error: { cursor: { message: err.message } } }),
+						400,
+					)
 				}
 				throw err
 			}
 		}
 
 		const result = await ProductRepository.list(c.var.db, foundShop.id, { limit: LIMIT, cursor })
-		return c.json({
-			message: "ok",
-			data: {
+		return c.json(
+			successResponse("Products fetched successfully.", {
 				data: result.rows,
 				pagination: { nextCursor: result.nextCursor ? encodeCursor(result.nextCursor) : null },
-			},
-		})
+			}),
+		)
 	},
 )
 
 export const getProductHandlers = factory.createHandlers(auth, validate("param", productIdParamSchema), async (c) => {
 	const { id } = c.req.valid("param")
 	const foundShop = await ShopRepository.findByOwnerUserId(c.var.db, c.var.userId)
-	if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+	if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 	const foundProduct = await ProductRepository.findById(c.var.db, id, foundShop.id)
-	if (!foundProduct) return c.json({ message: "Product not found." }, 404)
-	return c.json({ message: "ok", data: { product: foundProduct } })
+	if (!foundProduct) return c.json(errorResponse({ message: "Product not found." }), 404)
+	return c.json(successResponse("Product fetched successfully.", foundProduct))
 })
 
 export const updateProductHandlers = factory.createHandlers(
@@ -106,20 +114,23 @@ export const updateProductHandlers = factory.createHandlers(
 		const body = c.req.valid("json")
 		const db = c.var.db
 		const foundShop = await ShopRepository.findByOwnerUserId(db, c.var.userId)
-		if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+		if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 		const foundProduct = await ProductRepository.findById(db, id, foundShop.id)
-		if (!foundProduct) return c.json({ message: "Product not found." }, 404)
+		if (!foundProduct) return c.json(errorResponse({ message: "Product not found." }), 404)
 
 		if (body.categoryId !== null && !(await CategoryRepository.findById(db, body.categoryId, foundShop.id))) {
-			return c.json({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }, 422)
+			return c.json(
+				errorResponse({ message: "Validation failed.", error: { categoryId: { message: "Category not found." } } }),
+				422,
+			)
 		}
 
 		let slug: string
 		try {
 			slug = deriveProductSlug(body.name)
 		} catch (err) {
-			if (err instanceof InvalidProductNameError) return c.json({ message: err.message }, 422)
+			if (err instanceof InvalidProductNameError) return c.json(errorResponse({ message: err.message }), 422)
 			throw err
 		}
 
@@ -133,13 +144,15 @@ export const updateProductHandlers = factory.createHandlers(
 				categoryId: body.categoryId,
 			})
 		} catch (err) {
-			if (err instanceof ProductSlugExistsError) return c.json({ message: "Product slug is already taken." }, 409)
+			if (err instanceof ProductSlugExistsError) {
+				return c.json(errorResponse({ message: "Product slug is already taken." }), 409)
+			}
 			throw err
 		}
 
 		const updatedProduct = await ProductRepository.findById(db, id, foundShop.id)
 		if (!updatedProduct) throw new Error("Product was updated but could not be read back")
-		return c.json({ message: "Product updated.", data: { product: updatedProduct } })
+		return c.json(successResponse("Product updated successfully.", updatedProduct))
 	},
 )
 
@@ -149,12 +162,12 @@ export const deleteProductHandlers = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param")
 		const foundShop = await ShopRepository.findByOwnerUserId(c.var.db, c.var.userId)
-		if (!foundShop) return c.json({ message: "Shop not found." }, 404)
+		if (!foundShop) return c.json(errorResponse({ message: "Shop not found." }), 404)
 
 		const foundProduct = await ProductRepository.findById(c.var.db, id, foundShop.id)
-		if (!foundProduct) return c.json({ message: "Product not found." }, 404)
+		if (!foundProduct) return c.json(errorResponse({ message: "Product not found." }), 404)
 
 		await ProductRepository.delete(c.var.db, id, foundShop.id)
-		return c.json({ message: "Product deleted." })
+		return c.json(successResponse("Product deleted successfully.", null))
 	},
 )

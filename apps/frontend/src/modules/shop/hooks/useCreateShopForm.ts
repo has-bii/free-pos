@@ -31,7 +31,8 @@ export function useCreateShopForm() {
 
 					if (response.ok) {
 						const data = await response.json()
-						const createdShop = data.data.shop
+						const createdShop = data.data
+						if (!createdShop) return { form: retryableFormError }
 						cacheCreatedShop(queryClient, createdShop)
 						formApi.reset()
 						await router.navigate({ to: "/onboarding/complete", replace: true })

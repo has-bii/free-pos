@@ -44,7 +44,9 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const expectInvalidToken = async (res: Response) => {
 	expect(res.status).toBe(401)
-	expect((await readJson<MessageBody>(res)).message).toBe("Invalid or expired refresh token.")
+	const body = await readJson<MessageBody>(res)
+	expect(body.success).toBe(false)
+	expect(body.message).toBe("Invalid or expired refresh token.")
 
 	// A dead refresh token must not linger in the browser, so every failure
 	// clears both cookies too.
@@ -65,7 +67,10 @@ describe("POST /refresh", () => {
 		// jar attaches it automatically here — this exercises that scoping.
 		const res = await fixture.client.post(PATH)
 		expect(res.status).toBe(200)
-		expect((await readJson<MessageBody>(res)).message).toBe("ok")
+		const body = await readJson<MessageBody>(res)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("Token refreshed successfully.")
+		expect(body.data).toBeNull()
 
 		const newAccessToken = fixture.client.jar.get(ACCESS_TOKEN_COOKIE_NAME)
 		const newRefreshToken = fixture.client.jar.get(REFRESH_TOKEN_COOKIE_NAME)
@@ -78,7 +83,8 @@ describe("POST /refresh", () => {
 		const me = await fixture.client.get("/me")
 		expect(me.status).toBe(200)
 		const meBody = await readJson<MeSuccessBody>(me)
-		expect(meBody.data.user.id).toBe(fixture.user.id)
+		expect(meBody.success).toBe(true)
+		expect(meBody.data.id).toBe(fixture.user.id)
 
 		// Case 29 — the presented refresh token is dead after rotation.
 		const replay = await post(PATH, cookieHeader(REFRESH_TOKEN_COOKIE_NAME, oldRefreshToken))

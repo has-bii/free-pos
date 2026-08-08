@@ -38,7 +38,9 @@ beforeAll(async () => {
 
 const expectUnauthorized = async (res: Response) => {
 	expect(res.status).toBe(401)
-	expect((await readJson<MessageBody>(res)).message).toBe("Unauthorized.")
+	const body = await readJson<MessageBody>(res)
+	expect(body.success).toBe(false)
+	expect(body.message).toBe("Unauthorized.")
 }
 
 describe("GET /me", () => {
@@ -48,8 +50,10 @@ describe("GET /me", () => {
 		expect(res.status).toBe(200)
 
 		const body = await readJson<MeSuccessBody>(res)
-		expect(body.data.user.id).toBe(fixture.user.id)
-		expect(body.data.user.email).toBe(fixture.email)
+		expect(body.success).toBe(true)
+		expect(body.message).toBe("User fetched successfully.")
+		expect(body.data.id).toBe(fixture.user.id)
+		expect(body.data.email).toBe(fixture.email)
 	})
 
 	// Case 18

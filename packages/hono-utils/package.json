@@ -1,5 +1,5 @@
 {
-	"name": "@repo/auth-kit",
+	"name": "@repo/hono-utils",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -7,11 +7,6 @@
 		"lint": "biome check .",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run"
-	},
-	"dependencies": {
-		"@repo/hono-utils": "workspace:*",
-		"@tsndr/cloudflare-worker-jwt": "catalog:",
-		"hono": "catalog:"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",

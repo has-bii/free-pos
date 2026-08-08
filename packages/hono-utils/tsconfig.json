@@ -3,8 +3,7 @@
 	"compilerOptions": {
 		"types": ["node"],
 		"paths": {
-			"@repo/auth-kit/*": ["./src/*"],
-			"@repo/hono-utils/*": ["../hono-utils/src/*"]
+			"@repo/hono-utils/*": ["./src/*"]
 		}
 	},
 	"include": ["src", "test"]

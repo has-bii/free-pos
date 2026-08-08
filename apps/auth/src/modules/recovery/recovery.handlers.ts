@@ -6,6 +6,7 @@ import { validate } from "@repo/auth/middleware/validate"
 import { AccountRepository } from "@repo/auth/repositories/account.repository"
 import { UserRepository } from "@repo/auth/repositories/user.repository"
 import { VerificationRepository } from "@repo/auth/repositories/verification.repository"
+import { errorResponse, successResponse } from "@repo/hono-utils/response"
 import { uuidv7 } from "uuidv7"
 import { forgotPasswordSchema, resetPasswordSchema } from "./recovery.schema"
 
@@ -22,13 +23,13 @@ export const forgotPasswordHandlers = factory.createHandlers(validate("json", fo
 	const foundUser = await UserRepository.findByEmail(db, email)
 	if (!foundUser) {
 		console.log(`reset requested for unknown email: ${email}`)
-		return c.json({ message: GENERIC_MESSAGE })
+		return c.json(successResponse(GENERIC_MESSAGE, null))
 	}
 
 	// Cooldown: a live link is still valid — no re-send, no rotate.
 	const existing = await VerificationRepository.findLiveByIdentifier(db, email)
 	if (existing) {
-		return c.json({ message: GENERIC_MESSAGE })
+		return c.json(successResponse(GENERIC_MESSAGE, null))
 	}
 
 	const rawToken = ResetToken.generate()
@@ -51,10 +52,10 @@ export const forgotPasswordHandlers = factory.createHandlers(validate("json", fo
 		// Un-arm the cooldown so a retry isn't blocked by a row whose link
 		// never reached the user. And don't claim success — 200 would be a lie.
 		await VerificationRepository.deleteById(db, id)
-		return c.json({ message: "Failed to send password reset email. Please try again." }, 500)
+		return c.json(errorResponse({ message: "Failed to send password reset email. Please try again." }), 500)
 	}
 
-	return c.json({ message: GENERIC_MESSAGE })
+	return c.json(successResponse(GENERIC_MESSAGE, null))
 })
 
 export const resetPasswordHandlers = factory.createHandlers(validate("json", resetPasswordSchema), async (c) => {
@@ -63,7 +64,7 @@ export const resetPasswordHandlers = factory.createHandlers(validate("json", res
 
 	// One message for every failure mode — no oracle distinguishing "wrong
 	// token" from "expired" from "already used".
-	const invalidToken = () => c.json({ message: "Invalid or expired reset token." }, 400)
+	const invalidToken = () => c.json(errorResponse({ message: "Invalid or expired reset token." }), 400)
 
 	const value = await ResetToken.hash(token)
 
@@ -96,5 +97,5 @@ export const resetPasswordHandlers = factory.createHandlers(validate("json", res
 	if (!result.ok) return invalidToken()
 
 	// No session, no cookies — the user must log in again with the new password.
-	return c.json({ message: "Password has been reset." })
+	return c.json(successResponse("Password reset successfully.", null))
 })
