@@ -22,6 +22,13 @@
 			"when": 1786015425681,
 			"tag": "0002_fancy_vermin",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "5",
+			"when": 1786149051840,
+			"tag": "0003_noisy_shooting_star",
+			"breakpoints": true
 		}
 	]
 }

@@ -25,3 +25,17 @@ export class InvalidCursorError extends Error {
 		this.name = "InvalidCursorError"
 	}
 }
+
+export class ProductSlugExistsError extends Error {
+	constructor(slug: string) {
+		super(`Product slug already exists: ${slug}`)
+		this.name = "ProductSlugExistsError"
+	}
+}
+
+export class InvalidProductNameError extends Error {
+	constructor() {
+		super("Product name must contain at least one letter or number.")
+		this.name = "InvalidProductNameError"
+	}
+}
